@@ -137,6 +137,77 @@ Follow the [MCP guide](mcp.md). In brief:
 
 **Checkpoint:** the client discovers the agent's tool and invokes it; if authentication/client compatibility fails, use the troubleshooting guidance rather than claiming MCP worked.
 
+### Optional: call the MCP server from Python
+
+This is an alternative to the VS Code client, not a requirement for loading the CSVs or completing the no-code lab. Use **Python 3.10+** and the **Azure CLI** on your local computer. The signed-in account must have access to the published agent and its semantic model.
+
+Install the client libraries and sign in to the tenant containing your Fabric workspace:
+
+```powershell
+python -m pip install "mcp>=1.10,<2" azure-identity
+az login --tenant YOUR_TENANT_ID
+```
+
+Save the following as `call_agent.py`. Replace `MCP_URL` with the **actual URL copied from Settings > Model Context Protocol**, not the agent's browser URL. This example uses the MCP Python SDK's version 1 API, obtains a Fabric token from your Azure CLI sign-in, initializes the MCP connection, discovers the agent's tool and question argument, and calls it.
+
+```python
+import asyncio
+
+from azure.identity.aio import AzureCliCredential
+from mcp import ClientSession
+from mcp.client.streamable_http import streamablehttp_client
+
+MCP_URL = "PASTE_YOUR_PUBLISHED_DATA_AGENT_MCP_URL_HERE"
+QUESTION = "What is October 2026 net billed revenue in USD?"
+
+
+async def main():
+    if not MCP_URL.startswith("https://api.fabric.microsoft.com/v1/mcp/"):
+        raise ValueError("Copy the published Data Agent MCP URL into MCP_URL.")
+
+    async with AzureCliCredential() as credential:
+        token = await credential.get_token(
+            "https://api.fabric.microsoft.com/.default"
+        )
+
+    headers = {"Authorization": f"Bearer {token.token}"}
+    async with streamablehttp_client(MCP_URL, headers=headers) as (read, write, _):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            tools = (await session.list_tools()).tools
+            if len(tools) != 1:
+                raise RuntimeError("Expected one tool from the Data Agent server.")
+
+            tool = tools[0]
+            properties = tool.inputSchema.get("properties", {})
+            if len(properties) != 1:
+                raise RuntimeError(
+                    f"Inspect the tool input schema before calling: {tool.inputSchema}"
+                )
+            question_arg, definition = next(iter(properties.items()))
+            if definition.get("type") != "string":
+                raise RuntimeError("Expected a single string question argument.")
+
+            print(f"Calling tool: {tool.name}")
+            result = await session.call_tool(tool.name, {question_arg: QUESTION})
+            if result.isError:
+                raise RuntimeError(f"MCP tool failed: {result.model_dump_json()}")
+            for block in result.content:
+                print(block.text if block.type == "text" else block.model_dump_json())
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+Run it from the folder where you saved the file:
+
+```powershell
+python .\call_agent.py
+```
+
+Compare the answer with **$66,728.00** and the Fabric chat/report result. The sample acquires a token for this short-lived session; a long-running application needs token renewal. Never print or save bearer tokens. Authentication, permission, transport, and tool errors are surfaced rather than treated as valid answers. This example hasn't been run against a live workshop agent.
+
 ## Troubleshooting
 
 | Issue | What to check |
