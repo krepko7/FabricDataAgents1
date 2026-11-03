@@ -1,0 +1,60 @@
+{
+  "01_october_billing": [
+    {"ProductName": "Carfax Reports (demo)", "RecurringBilled": 3576, "UsageBilled": 30420, "Credits": 0, "NetBilled": 33996},
+    {"ProductName": "Dealer Management System", "RecurringBilled": 11677, "UsageBilled": 0, "Credits": 0, "NetBilled": 11677},
+    {"ProductName": "Dealer CRM", "RecurringBilled": 7176, "UsageBilled": 0, "Credits": 0, "NetBilled": 7176},
+    {"ProductName": "Auction Access", "RecurringBilled": 1639, "UsageBilled": 4860, "Credits": 0, "NetBilled": 6499},
+    {"ProductName": "Dealer Website", "RecurringBilled": 4776, "UsageBilled": 0, "Credits": 0, "NetBilled": 4776},
+    {"ProductName": "AutoCheck Reports (demo)", "RecurringBilled": 1188, "UsageBilled": 736, "Credits": 0, "NetBilled": 1924},
+    {"ProductName": "Vehicle Book Values", "RecurringBilled": 623, "UsageBilled": 57, "Credits": 0, "NetBilled": 680}
+  ],
+  "02_overdue_receivables": [
+    {"DealershipName": "Desert Mesa Motors", "OverdueInvoices": 2, "OverdueBalance": 3765},
+    {"DealershipName": "Coastal Bend Auto", "OverdueInvoices": 1, "OverdueBalance": 2469.75},
+    {"DealershipName": "Blue Canyon Auto", "OverdueInvoices": 1, "OverdueBalance": 985}
+  ],
+  "03_duplicate_subscriptions": [
+    {"DealershipName": "Maple Grove Auto", "ProductName": "Dealer CRM", "ActiveContracts": 2, "ContractMRR": 598, "SuspectedExcessMRR": 299}
+  ],
+  "04_post_cancellation_billing": [
+    {"DealershipName": "Pinecrest Auto", "ProductName": "Dealer Website", "EndDate": "2026-08-31", "IncorrectCharges": 2, "BilledAfterEnd": 398}
+  ],
+  "05_usage_spike": [
+    {"DealershipName": "Sunset Valley Motors", "ProductName": "Carfax Reports (demo)", "OctoberQuantity": 2400, "BaselineQuantity": 80.22, "BaselineMultiple": 29.92, "ExpectedOverage": 23500},
+    {"DealershipName": "Willow Brook Motors", "ProductName": "Carfax Reports (demo)", "OctoberQuantity": 500, "BaselineQuantity": 77.78, "BaselineMultiple": 6.43, "ExpectedOverage": 4500}
+  ],
+  "06_deep_discount": [
+    {"DealershipName": "Summit Trail Motors", "ProductName": "Dealer Management System", "MonthlyListPrice": 499, "MonthlyRate": 199, "MonthlyListGap": 300, "DiscountPercent": 60.12}
+  ],
+  "07_rate_overcharge": [
+    {"DealershipName": "Oak Hollow Motors", "ProductName": "Dealer Management System", "InvoiceNumber": "INV-202610-011", "ContractRate": 499, "BilledRate": 999, "Overcharge": 500}
+  ],
+  "08_unbilled_usage": [
+    {"DealershipName": "Willow Brook Motors", "ProductName": "Carfax Reports (demo)", "Quantity": 500, "IncludedUnits": 50, "OverageUnitPrice": 10, "ExpectedOverage": 4500, "BilledOverage": 0, "UnbilledOverage": 4500}
+  ],
+  "09_failed_payment_attempts": [
+    {"DealershipName": "Coastal Bend Auto", "FailedAttempts": 6, "AffectedInvoices": 2, "OutstandingBalance": 5015.25}
+  ],
+  "10_contract_mrr_change": [
+    {"SnapshotDate": "2026-09-30", "EntitledSubscriptions": 125, "ContractMRR": 30455},
+    {"SnapshotDate": "2026-10-31", "EntitledSubscriptions": 124, "ContractMRR": 29956}
+  ],
+  "11_service_credits": [
+    {"DealershipName": "Golden Plains Auto", "ProductName": "Dealer Management System", "ReasonCode": "ServiceCredit", "CreditAmount": -300}
+  ],
+  "12_cross_sell": [
+    {"DealershipName": "Aspen Ridge Motors", "Region": "Midwest", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Cedar Ridge Motors", "Region": "West", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Cypress Lane Cars", "Region": "West", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Juniper Hill Motors", "Region": "Midwest", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Lakefront Auto Mall", "Region": "Midwest", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Maple Grove Auto", "Region": "West", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Meadow Park Auto", "Region": "South", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Northstar Auto", "Region": "Northeast", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Oak Hollow Motors", "Region": "Midwest", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Prairie View Cars", "Region": "South", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Silver Creek Cars", "Region": "West", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Sunset Valley Motors", "Region": "South", "PotentialMonthlyListRevenue": 149},
+    {"DealershipName": "Willow Brook Motors", "Region": "South", "PotentialMonthlyListRevenue": 149}
+  ]
+}

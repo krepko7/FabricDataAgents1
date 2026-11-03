@@ -1,0 +1,25 @@
+DealershipID,DealershipName,DealerGroup,City,StateCode,Region,AccountStatus,JoinedDate,BillingEmail,PaymentTermsDays
+1,Cedar Ridge Motors,Demo Group 1,Irvine,CA,West,Active,2024-01-01,billing01@dealership.example,15
+2,Harbor Point Auto,Demo Group 1,Phoenix,AZ,West,Active,2024-01-01,billing02@dealership.example,15
+3,Prairie View Cars,Demo Group 1,Dallas,TX,South,Active,2024-01-01,billing03@dealership.example,15
+4,Desert Mesa Motors,Demo Group 1,Tampa,FL,South,Active,2024-01-01,billing04@dealership.example,15
+5,Lakefront Auto Mall,Demo Group 1,Columbus,OH,Midwest,Active,2024-01-01,billing05@dealership.example,15
+6,Summit Trail Motors,Demo Group 1,Albany,NY,Northeast,Active,2024-01-01,billing06@dealership.example,15
+7,Maple Grove Auto,Demo Group 2,Irvine,CA,West,Active,2024-01-01,billing07@dealership.example,15
+8,Riverbend Car Center,Demo Group 2,Phoenix,AZ,West,Active,2024-01-01,billing08@dealership.example,15
+9,Sunset Valley Motors,Demo Group 2,Dallas,TX,South,Active,2024-01-01,billing09@dealership.example,15
+10,Blue Canyon Auto,Demo Group 2,Tampa,FL,South,Active,2024-01-01,billing10@dealership.example,15
+11,Oak Hollow Motors,Demo Group 2,Columbus,OH,Midwest,Active,2024-01-01,billing11@dealership.example,15
+12,Pinecrest Auto,Demo Group 2,Albany,NY,Northeast,Active,2024-01-01,billing12@dealership.example,15
+13,Silver Creek Cars,Demo Group 3,Irvine,CA,West,Active,2024-01-01,billing13@dealership.example,15
+14,Red Rock Auto,Demo Group 3,Phoenix,AZ,West,Active,2024-01-01,billing14@dealership.example,15
+15,Willow Brook Motors,Demo Group 3,Dallas,TX,South,Active,2024-01-01,billing15@dealership.example,15
+16,Golden Plains Auto,Demo Group 3,Tampa,FL,South,Active,2024-01-01,billing16@dealership.example,15
+17,Aspen Ridge Motors,Demo Group 3,Columbus,OH,Midwest,Active,2024-01-01,billing17@dealership.example,15
+18,Coastal Bend Auto,Demo Group 3,Albany,NY,Northeast,Active,2024-01-01,billing18@dealership.example,15
+19,Cypress Lane Cars,Demo Group 4,Irvine,CA,West,Active,2024-01-01,billing19@dealership.example,15
+20,Stonebridge Motors,Demo Group 4,Phoenix,AZ,West,Active,2024-01-01,billing20@dealership.example,15
+21,Meadow Park Auto,Demo Group 4,Dallas,TX,South,Active,2024-01-01,billing21@dealership.example,15
+22,Clearwater Car Center,Demo Group 4,Tampa,FL,South,Active,2024-01-01,billing22@dealership.example,15
+23,Juniper Hill Motors,Demo Group 4,Columbus,OH,Midwest,Active,2024-01-01,billing23@dealership.example,15
+24,Northstar Auto,Demo Group 4,Albany,NY,Northeast,Active,2024-01-01,billing24@dealership.example,15

@@ -1,0 +1,252 @@
+-- Query-scoped definitions for testing in DAX query view.
+-- Persist each MEASURE expression with New measure in its named host table.
+-- Running this file alone does NOT save measures into a model.
+DEFINE
+    MEASURE 'Invoices'[Demo As Of Date] = DATE(2026, 11, 3)
+
+    MEASURE 'InvoiceLines'[Net Billed] =
+        CALCULATE(
+            SUM('InvoiceLines'[LineAmount]),
+            KEEPFILTERS('Invoices'[InvoiceStatus] = "Issued")
+        )
+
+    MEASURE 'InvoiceLines'[Recurring Billed] =
+        CALCULATE([Net Billed], KEEPFILTERS('InvoiceLines'[LineType] = "Recurring"))
+
+    MEASURE 'InvoiceLines'[Usage Billed] =
+        CALCULATE([Net Billed], KEEPFILTERS('InvoiceLines'[LineType] = "Usage"))
+
+    MEASURE 'InvoiceLines'[Service Credits] =
+        CALCULATE([Net Billed], KEEPFILTERS('InvoiceLines'[LineType] = "Credit"))
+
+    MEASURE 'Payments'[Collected Cash] =
+        VAR _asOf = [Demo As Of Date]
+        RETURN
+            IF(
+                ISFILTERED('Products') || ISFILTERED('Subscriptions') || ISFILTERED('InvoiceLines'),
+                BLANK(),
+                CALCULATE(
+                    SUM('Payments'[Amount]),
+                    KEEPFILTERS('Payments'[PaymentStatus] = "Succeeded"),
+                    KEEPFILTERS('Payments'[PaymentDate] <= _asOf),
+                    KEEPFILTERS('Invoices'[InvoiceStatus] = "Issued"),
+                    KEEPFILTERS(TREATAS(VALUES('Dealerships'[DealershipID]), 'Invoices'[DealershipID]))
+                )
+            )
+
+    MEASURE 'Payments'[Failed Payment Attempts] =
+        VAR _asOf = [Demo As Of Date]
+        RETURN
+            IF(
+                ISFILTERED('Products') || ISFILTERED('Subscriptions') || ISFILTERED('InvoiceLines'),
+                BLANK(),
+                CALCULATE(
+                    COUNTROWS('Payments'),
+                    KEEPFILTERS('Payments'[PaymentStatus] = "Failed"),
+                    KEEPFILTERS('Payments'[PaymentDate] <= _asOf),
+                    KEEPFILTERS('Invoices'[InvoiceStatus] = "Issued"),
+                    KEEPFILTERS(TREATAS(VALUES('Dealerships'[DealershipID]), 'Invoices'[DealershipID]))
+                )
+            )
+
+    MEASURE 'Invoices'[Outstanding Balance] =
+        VAR _asOf = [Demo As Of Date]
+        VAR _invoices =
+            CALCULATETABLE(
+                'Invoices',
+                KEEPFILTERS('Invoices'[InvoiceStatus] = "Issued"),
+                KEEPFILTERS('Invoices'[InvoiceDate] <= _asOf),
+                KEEPFILTERS(TREATAS(VALUES('Dealerships'[DealershipID]), 'Invoices'[DealershipID]))
+            )
+        RETURN
+            IF(
+                ISFILTERED('Products') || ISFILTERED('Subscriptions') || ISFILTERED('InvoiceLines'),
+                BLANK(),
+                SUMX(
+                    _invoices,
+                    VAR _paid =
+                        CALCULATE(
+                            SUM('Payments'[Amount]),
+                            'Payments'[PaymentStatus] = "Succeeded",
+                            'Payments'[PaymentDate] <= _asOf
+                        )
+                    RETURN MAX(0, 'Invoices'[TotalAmount] - COALESCE(_paid, 0))
+                )
+            )
+
+    MEASURE 'Invoices'[Overdue Balance] =
+        VAR _asOf = [Demo As Of Date]
+        RETURN CALCULATE([Outstanding Balance], KEEPFILTERS('Invoices'[DueDate] < _asOf))
+
+    MEASURE 'Subscriptions'[October Contract MRR] =
+        VAR _snapshot = DATE(2026, 10, 31)
+        RETURN
+            CALCULATE(
+                SUM('Subscriptions'[MonthlyRate]),
+                KEEPFILTERS('Subscriptions'[StartDate] <= _snapshot),
+                KEEPFILTERS(ISBLANK('Subscriptions'[EndDate]) || 'Subscriptions'[EndDate] >= _snapshot)
+            )
+
+    MEASURE 'Subscriptions'[September Contract MRR] =
+        VAR _snapshot = DATE(2026, 9, 30)
+        RETURN
+            CALCULATE(
+                SUM('Subscriptions'[MonthlyRate]),
+                KEEPFILTERS('Subscriptions'[StartDate] <= _snapshot),
+                KEEPFILTERS(ISBLANK('Subscriptions'[EndDate]) || 'Subscriptions'[EndDate] >= _snapshot)
+            )
+
+    MEASURE 'Subscriptions'[Contract MRR Change] =
+        [October Contract MRR] - [September Contract MRR]
+
+    MEASURE 'Subscriptions'[October Entitled Subscriptions] =
+        VAR _snapshot = DATE(2026, 10, 31)
+        RETURN
+            CALCULATE(
+                COUNTROWS('Subscriptions'),
+                KEEPFILTERS('Subscriptions'[StartDate] <= _snapshot),
+                KEEPFILTERS(ISBLANK('Subscriptions'[EndDate]) || 'Subscriptions'[EndDate] >= _snapshot)
+            )
+
+    MEASURE 'Subscriptions'[Duplicate Contract Count] =
+        VAR _snapshot = DATE(2026, 10, 31)
+        RETURN
+            SUMX(
+                SUMMARIZE('Subscriptions', 'Subscriptions'[DealershipID], 'Subscriptions'[ProductID]),
+                VAR _contracts =
+                    CALCULATE(
+                        COUNTROWS('Subscriptions'),
+                        KEEPFILTERS('Subscriptions'[StartDate] <= _snapshot),
+                        KEEPFILTERS(ISBLANK('Subscriptions'[EndDate]) || 'Subscriptions'[EndDate] >= _snapshot)
+                    )
+                RETURN MAX(0, _contracts - 1)
+            )
+
+    MEASURE 'Subscriptions'[Deep Discount Monthly Gap] =
+        VAR _snapshot = DATE(2026, 10, 31)
+        RETURN
+            SUMX(
+                FILTER(
+                    'Subscriptions',
+                    'Subscriptions'[StartDate] <= _snapshot
+                        && (ISBLANK('Subscriptions'[EndDate]) || 'Subscriptions'[EndDate] >= _snapshot)
+                        && RELATED('Products'[MonthlyListPrice]) > 0
+                        && 'Subscriptions'[MonthlyRate] <= RELATED('Products'[MonthlyListPrice]) * 0.5
+                ),
+                RELATED('Products'[MonthlyListPrice]) - 'Subscriptions'[MonthlyRate]
+            )
+
+    MEASURE 'InvoiceLines'[Post Cancellation Billed] =
+        CALCULATE(
+            SUMX(
+                FILTER(
+                    'InvoiceLines',
+                    'InvoiceLines'[LineType] = "Recurring"
+                        && NOT ISBLANK(RELATED('Subscriptions'[EndDate]))
+                        && 'InvoiceLines'[ServiceMonth] > RELATED('Subscriptions'[EndDate])
+                ),
+                'InvoiceLines'[LineAmount]
+            ),
+            KEEPFILTERS('Invoices'[InvoiceStatus] = "Issued")
+        )
+
+    MEASURE 'InvoiceLines'[Rate Overcharge] =
+        CALCULATE(
+            SUMX(
+                FILTER('InvoiceLines', 'InvoiceLines'[LineType] = "Recurring"),
+                MAX(
+                    0,
+                    'InvoiceLines'[LineAmount]
+                        - 'InvoiceLines'[Quantity] * RELATED('Subscriptions'[MonthlyRate])
+                )
+            ),
+            KEEPFILTERS('Invoices'[InvoiceStatus] = "Issued")
+        )
+
+    MEASURE 'UsageRecords'[Expected Overage] =
+        SUMX(
+            'UsageRecords',
+            MAX(0, 'UsageRecords'[Quantity] - RELATED('Subscriptions'[IncludedUnits]))
+                * RELATED('Subscriptions'[OverageUnitPrice])
+        )
+
+    MEASURE 'UsageRecords'[Unbilled Overage] =
+        SUMX(
+            'UsageRecords',
+            VAR _subscription = 'UsageRecords'[SubscriptionID]
+            VAR _month = 'UsageRecords'[UsageMonth]
+            VAR _expected =
+                MAX(0, 'UsageRecords'[Quantity] - RELATED('Subscriptions'[IncludedUnits]))
+                    * RELATED('Subscriptions'[OverageUnitPrice])
+            VAR _billed =
+                CALCULATE(
+                    [Usage Billed],
+                    KEEPFILTERS('InvoiceLines'[SubscriptionID] = _subscription),
+                    KEEPFILTERS('InvoiceLines'[ServiceMonth] = _month)
+                )
+            RETURN MAX(0, _expected - COALESCE(_billed, 0))
+        )
+
+    MEASURE 'UsageRecords'[October Usage Baseline Multiple] =
+        IF(
+            HASONEVALUE('Subscriptions'[SubscriptionID]),
+            VAR _october =
+                CALCULATE(
+                    SUM('UsageRecords'[Quantity]),
+                    REMOVEFILTERS('UsageRecords'[UsageMonth]),
+                    'UsageRecords'[UsageMonth] = DATE(2026, 10, 1)
+                )
+            VAR _baseline =
+                CALCULATE(
+                    AVERAGE('UsageRecords'[Quantity]),
+                    REMOVEFILTERS('UsageRecords'[UsageMonth]),
+                    'UsageRecords'[UsageMonth] >= DATE(2026, 1, 1),
+                    'UsageRecords'[UsageMonth] < DATE(2026, 10, 1)
+                )
+            RETURN DIVIDE(_october, _baseline)
+        )
+
+    MEASURE 'Dealerships'[Auction Cross Sell Dealers] =
+        VAR _snapshot = DATE(2026, 10, 31)
+        RETURN
+            SUMX(
+                FILTER('Dealerships', 'Dealerships'[AccountStatus] = "Active"),
+                VAR _dms =
+                    CALCULATE(
+                        COUNTROWS('Subscriptions'),
+                        REMOVEFILTERS('Products'),
+                        'Products'[ProductCode] = "DMS",
+                        'Subscriptions'[StartDate] <= _snapshot,
+                        ISBLANK('Subscriptions'[EndDate]) || 'Subscriptions'[EndDate] >= _snapshot
+                    )
+                VAR _auction =
+                    CALCULATE(
+                        COUNTROWS('Subscriptions'),
+                        REMOVEFILTERS('Products'),
+                        'Products'[ProductCode] = "AUCTION",
+                        'Subscriptions'[StartDate] <= _snapshot,
+                        ISBLANK('Subscriptions'[EndDate]) || 'Subscriptions'[EndDate] >= _snapshot
+                    )
+                RETURN IF(_dms > 0 && _auction = 0, 1, BLANK())
+            )
+
+    MEASURE 'Dealerships'[Auction Cross Sell List Opportunity] =
+        VAR _listPrice =
+            CALCULATE(
+                MAX('Products'[MonthlyListPrice]),
+                REMOVEFILTERS('Products'),
+                'Products'[ProductCode] = "AUCTION"
+            )
+        RETURN [Auction Cross Sell Dealers] * _listPrice
+
+EVALUATE
+    ROW(
+        "October Net Billed",
+            CALCULATE([Net Billed], 'InvoiceLines'[ServiceMonth] = DATE(2026, 10, 1)),
+        "Overdue Balance", [Overdue Balance],
+        "October Contract MRR", [October Contract MRR],
+        "MRR Change", [Contract MRR Change],
+        "Unbilled Overage",
+            CALCULATE([Unbilled Overage], 'UsageRecords'[UsageMonth] = DATE(2026, 10, 1)),
+        "Auction Cross Sell Dealers", [Auction Cross Sell Dealers]
+    )

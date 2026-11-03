@@ -1,0 +1,8 @@
+ProductID,ProductCode,ProductName,Category,MonthlyListPrice,IncludedUnits,OverageUnitPrice,UsageUnit
+1,WEB,Dealer Website,Digital retail,199.00,0,0.00,None
+2,AUCTION,Auction Access,Auctions,149.00,5,15.00,Auctions
+3,BOOK,Vehicle Book Values,Valuations,89.00,100,0.25,Lookups
+4,CRM,Dealer CRM,CRM,299.00,0,0.00,None
+5,DMS,Dealer Management System,DMS,499.00,0,0.00,None
+6,AUTOCHECK,AutoCheck Reports (demo),Vehicle history,99.00,25,2.00,Reports
+7,CARFAX,Carfax Reports (demo),Vehicle history,149.00,50,10.00,Reports
