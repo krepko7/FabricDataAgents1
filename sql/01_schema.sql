@@ -59,6 +59,7 @@ BEGIN TRY
         SubscriptionID int NOT NULL REFERENCES dbo.Subscriptions(SubscriptionID),
         UsageMonth date NOT NULL,
         Quantity int NOT NULL CHECK (Quantity >= 0),
+        -- Explicit precision avoids datetime2's default (7), beyond Delta's six digits.
         RecordedAt datetime2(0) NOT NULL,
         UNIQUE (SubscriptionID, UsageMonth),
         CHECK (DAY(UsageMonth) = 1)

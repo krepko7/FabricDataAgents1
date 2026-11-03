@@ -41,6 +41,24 @@ class SqlServerTests(unittest.TestCase):
         query = (ROOT / "sql" / "03_validate.sql").read_text()
         self.assertIn("PASS: source reconciliation", self.run_sql(query))
 
+    def test_mirroring_guard_rejects_incompatible_columns(self):
+        validation = (ROOT / "sql" / "03_validate.sql").read_text().replace("'", "''")
+        for definition in [
+            "xml NULL", "nvarchar(max) NULL", "datetime2(7) NULL",
+            "AS (DealershipID + 100)",
+        ]:
+            with self.subTest(definition=definition):
+                query = (
+                    "BEGIN TRY\nBEGIN TRANSACTION;\n"
+                    f"ALTER TABLE dbo.Dealerships ADD MirroringProbe {definition};\n"
+                    f"EXEC sys.sp_executesql N'{validation}';\n"
+                    "ROLLBACK;\nEND TRY\nBEGIN CATCH\n"
+                    "IF @@TRANCOUNT > 0 ROLLBACK;\nTHROW;\nEND CATCH;"
+                )
+                with self.assertRaisesRegex(AssertionError, r"mirroring-safe demo policy.*MirroringProbe"):
+                    self.run_sql(query)
+        self.test_reconciliation_on_sql_server()
+
     def test_schema_and_seed_refuse_reload(self):
         for filename, message in [
             ("01_schema.sql", "Demo tables already exist"),

@@ -1,6 +1,33 @@
 -- Run against the Azure SQL source after loading. Read-only and assertion-based.
 SET NOCOUNT ON;
 
+-- Conservative demo allowlist, not the complete Fabric type support catalog.
+DECLARE @IncompatibleColumns nvarchar(2048);
+SELECT @IncompatibleColumns = STRING_AGG(
+    CAST(QUOTENAME(t.name) + N'.' + QUOTENAME(c.name) AS nvarchar(max)), N', '
+)
+FROM sys.tables t
+JOIN sys.columns c ON c.object_id = t.object_id
+JOIN sys.types ty ON ty.user_type_id = c.user_type_id
+WHERE t.schema_id = SCHEMA_ID('dbo')
+  AND t.name IN ('Dealerships', 'Products', 'Subscriptions', 'UsageRecords',
+                 'Invoices', 'InvoiceLines', 'Payments')
+  AND (
+      ty.is_user_defined = 1 OR c.is_computed = 1
+      OR NOT (
+          ty.name IN ('int', 'date')
+          OR (ty.name IN ('char', 'varchar', 'nvarchar') AND c.max_length > 0)
+          OR (ty.name = 'decimal' AND c.precision = 12 AND c.scale = 2)
+          OR (ty.name = 'datetime2' AND c.scale <= 6)
+      )
+  );
+IF @IncompatibleColumns IS NOT NULL
+BEGIN
+    SET @IncompatibleColumns = N'Columns outside the mirroring-safe demo policy: '
+        + @IncompatibleColumns;
+    THROW 50015, @IncompatibleColumns, 1;
+END;
+
 IF (SELECT COUNT(*) FROM dbo.Dealerships) <> 24
     THROW 50010, 'Expected 24 dealerships.', 1;
 IF (SELECT COUNT(*) FROM dbo.Products) <> 7

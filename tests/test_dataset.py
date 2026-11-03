@@ -84,6 +84,32 @@ class DatasetTests(unittest.TestCase):
                 self.assertEqual((Path(directory) / relative).read_bytes(),
                                  (ROOT / relative).read_bytes(), str(relative))
 
+    def test_all_column_types_are_mirroring_safe(self):
+        schema = (ROOT / "sql" / "01_schema.sql").read_text()
+        tables = re.findall(r"CREATE TABLE dbo\.(\w+) \((.*?)\n    \);", schema, re.DOTALL)
+        self.assertEqual(len(tables), 7)
+        for table, body in tables:
+            columns = re.findall(
+                r"^\s*(\w+)\s+(\w+)(?:\(([^)]+)\))?\s+(?:NOT NULL|NULL)",
+                body, re.MULTILINE,
+            )
+            self.assertEqual([column for column, _, _ in columns], generator.TABLES[table])
+            self.assertEqual(columns[0][1:], ("int", ""))
+            for column, kind, arguments in columns:
+                with self.subTest(table=table, column=column):
+                    self.assertIn(kind, {"int", "date", "char", "varchar", "nvarchar",
+                                         "decimal", "datetime2"})
+                    if kind in {"char", "varchar", "nvarchar"}:
+                        self.assertTrue(arguments.isdigit(), "Use bounded text, not MAX.")
+                        self.assertGreater(int(arguments), 0)
+                    elif kind == "decimal":
+                        self.assertEqual(arguments.replace(" ", ""), "12,2")
+                    elif kind == "datetime2":
+                        self.assertTrue(arguments.isdigit(), "Specify precision explicitly.")
+                        self.assertIn(int(arguments), range(7), "Avoid precision loss in Delta.")
+                    else:
+                        self.assertEqual(arguments, "")
+
     def test_keys_and_referential_integrity(self):
         primary_keys = {}
         for table, rows in self.data.items():

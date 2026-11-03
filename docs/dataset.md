@@ -6,6 +6,28 @@ This is a fictional billing application inspired by the requested Nowcom demo, n
 
 The **seven tables are OLTP entities**, with integer primary keys, enforced foreign keys, unique business references, checks, and operational indexes. The normalized invoice header/detail structure is preserved. Usage is stored as a monthly meter settlement transaction, not one row per API call and not a dimensional warehouse fact. A larger production design would likely separate plans, contract amendments, tax, allocations, dunning, and event-level usage; those are deliberately out of scope.
 
+## Fabric Mirroring column compatibility
+
+All **59 columns across the seven tables** use source types supported by Fabric Mirroring from Azure SQL Database and SQL Server. No column conversion or removal is needed:
+
+| SQL source type used | Purpose | Mirroring consideration |
+|---|---|---|
+| `int` | All primary/foreign keys, quantities, and terms | All seven primary keys are integers, avoiding unsupported key types and character-key collation issues. |
+| `char(2)`, `char(3)` | State and currency codes | Bounded character data. |
+| `varchar(n)` | Codes, statuses, and references | Bounded character data; no legacy text or MAX columns. |
+| `nvarchar(n)` | Dealer/product names, groups, and cities | Supported Unicode source text; replicated/endpoint representations need not preserve the source SQL type name. |
+| `decimal(12,2)` | Currency amounts and rates | Exact values; no floating-point currency conversions. |
+| `date` | Billing periods, entitlement dates, and payment dates | Calendar dates without a time-zone or fractional-second conversion. |
+| `datetime2(0)` | `UsageRecords.RecordedAt` | Explicit zero fractional digits, safely within Delta's six-digit precision limit; timestamps are interpreted as UTC. |
+
+There are **no computed columns**, user-defined/CLR types, `rowversion`/`timestamp`, `xml`, `sql_variant`, spatial types, `hierarchyid`, legacy `text`/`ntext`/`image`, native `json`/`vector`, or unbounded LOB columns. No clustered columnstore, temporal history, ledger history, in-memory, graph, or external tables are used.
+
+Don't change `RecordedAt` to an unqualified `datetime2`: its SQL default is precision 7, and mirroring trims the seventh fractional digit. Precision-7 temporal key types also have key eligibility restrictions. The demo deliberately avoids both precision loss and unsupported columns being omitted.
+
+`sql\03_validate.sql` checks actual `sys.columns`/`sys.types` metadata before reconciling data and fails with the offending column names. Its conservative demo allowlist accepts integers/dates, bounded text, `decimal(12,2)`, and explicit `datetime2` precision 0-6; **it is not the full list of all types Fabric supports**. Offline schema tests prevent accidental unsupported types, implicit timestamp precision, or unparsed columns in source changes.
+
+Reviewed against Microsoft's [Azure SQL mirroring limitations](https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database-limitations) and [SQL Server mirroring limitations](https://learn.microsoft.com/en-us/fabric/mirroring/sql-server-limitations) on 2026-11-03. Type compatibility alone doesn't establish source eligibility: this workshop still targets **Azure SQL Database**. Mirroring a self-managed SQL Server instead requires its version-specific setup, permissions, networking, and CDC/replication prerequisites; LocalDB execution isn't proof of mirroring eligibility.
+
 ## Data dictionary
 
 ### Dealerships - one customer billing account
