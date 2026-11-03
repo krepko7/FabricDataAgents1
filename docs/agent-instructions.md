@@ -1,109 +1,97 @@
-# AI setup: keep model semantics separate from orchestration
+# Copy-ready AI instructions
 
-The Data Agent's DAX generator uses **semantic-model metadata and Prep for AI**. It doesn't use agent-level instructions as a substitute for model calculation definitions. Configure both layers below. These are suggested workshop text for human review, not automatically deployed AI settings.
+Configure two separate layers. **Prep data for AI** on the semantic model provides business context for its DAX generator. Agent-level instructions help with orchestration and response style; they aren't a substitute for model-level definitions. Review these examples before saving them in your tenant.
 
-Don't paste the facilitator's answer key or expected result amounts into either layer. The agent must query the data.
+Don't paste the facilitator answer key into either layer. The agent should query the data.
 
-## 1. Semantic model: Prep data for AI instructions
+## 1. Semantic model: Prep data for AI
 
-Open the `Nowcom Billing` semantic model, select **Prep data for AI**, and review/apply this text through the supported UI:
-
-```text
-This model contains fictional dealership subscription billing, not real Nowcom
-customers or verified Nowcom prices. USD only. Baseline billing covers January
-through October 2026. Use November 3, 2026 as the fixed reporting date; never
-substitute today's date. Latest complete service month is October 2026.
-
-Use explicit model measures. "Revenue" means Net Billed, signed issued invoice
-lines by ServiceMonth, not GAAP recognized revenue or cash. Recurring Billed
-is different from contract MRR. Service Credits are negative billed lines.
-Use ServiceMonth or Invoices.BillingMonth for billed revenue. Use
-UsageRecords.UsageMonth for meter reporting. PaymentDate is for cash timing.
-
-Entitlement on a date means StartDate <= date and EndDate blank or >= date;
-EndDate is inclusive. SubscriptionStatus is current, not historical status.
-Use October Contract MRR and September Contract MRR for snapshots. Contract
-MRR excludes usage, credits, and billed-price errors. It includes all entitled
-contracts, even overlap candidates. A suspended product isn't a lost customer.
-
-Invoices are dealer/month headers. InvoiceLines are charge/credit rows.
-Payments are attempts, potentially many per invoice. Never sum invoice totals
-after joining lines or individual attempts. Successful payments alone settle
-an invoice. Failed attempts don't count as cash; distinguish attempt count,
-distinct invoices, and distinct dealerships.
-
-Use Outstanding Balance and Overdue Balance for invoice-level settlement.
-Overdue means DueDate strictly before November 3, 2026, after subtracting
-successful payments through that date. October invoices due November 15 aren't
-overdue. Invoice-level cash/AR isn't allocated to products and returns blank
-under direct product, subscription, or invoice-line filters.
-
-The semantic model intentionally omits the physical Dealerships-to-Invoices
-relationship to avoid ambiguous line filters. Cash/AR/failed-attempt measures
-transfer dealership filters using TREATAS. Don't bypass these measures by
-summing raw invoice or attempted-payment amounts.
-
-Usage Quantity is total metered units, including the allowance. Expected
-Overage = max(0, quantity - contract included units) * contract overage price.
-Unbilled Overage compares that amount with issued Usage lines for the same
-subscription and service month; compare before aggregating. A recurring base
-fee doesn't settle a missing usage charge.
-
-For usage outliers use October Usage Baseline Multiple with one subscription
-in context; it divides October quantity by the January-September monthly
-average. "Extreme" means more than five times that average.
-
-Duplicate Contract Count means excess entitled contracts per dealer/product
-on October 31. Suspected excess monthly rate assumes one contract was intended;
-it isn't proof of an invalid contract. Deep discounts mean at least 50 percent
-below list on entitled October contracts. Contracts and catalog terms aren't
-historically versioned; rates are constant within each seeded contract.
-
-Post Cancellation Billed means recurring lines with ServiceMonth after the
-inclusive EndDate. Rate Overcharge compares recurring unit prices with the
-negotiated contract rate, not the catalog list price. Cross-sell means active
-dealers with entitled DMS but no Auction Access on October 31. List-price
-opportunity isn't pipeline, conversion prediction, or booked revenue.
-
-There are no taxes, costs, refunds, support tickets, VINs, approval histories,
-contract amendments, or external market data. Don't invent causal explanations,
-margins, incident details, discount approvals, or fraud determinations.
-```
-
-Also configure descriptions and measure formats from [semantic-model.md](semantic-model.md). Add synonyms such as Dealerships = dealers/customers; Subscriptions = contracts; Net Billed = billed revenue; Overdue Balance = past due receivables; Contract MRR = monthly recurring revenue; UsageRecords = meter settlements.
-
-In **Simplify data schema**, include the seven tables and the fields/measures needed for these questions, plus their dependencies. Keep the same table scope in the Data Agent. If a necessary dependency is hidden for reports, ensure the AI configuration doesn't accidentally exclude it. Schema selection and hidden flags aren't security enforcement.
-
-## 2. Data Agent: source description
+Open the `Nowcom Billing` semantic model, select **Prep data for AI**, and add these AI instructions:
 
 ```text
-Nowcom Billing is a semantic model over seven mirrored fictional dealership
-billing tables. It supports billed revenue, collections, contract run rates,
-meter-to-bill comparisons, subscription review, and auction cross-sell.
-Business definitions and the fixed reporting date live in its measures,
-metadata, and Prep for AI configuration.
+This model contains fictional dealership subscriptions, usage, invoices and
+payments. Product names and prices are illustrative, not verified Nowcom data.
+Amounts are USD. Billing history covers January through October 2026. Use
+November 3, 2026 as the fixed reporting date rather than today's date.
+
+Net billed means signed InvoiceLines.LineAmount for issued invoices, by
+ServiceMonth. Credits are negative. Net billed isn't recognized accounting
+revenue, contract MRR, or collected cash. For monthly usage use UsageMonth.
+
+A subscription is entitled on a date when StartDate is on or before that date,
+and EndDate is blank or on or after that date. EndDate is inclusive. Current
+SubscriptionStatus is not historical status. Contract MRR is the sum of
+MonthlyRate for entitled contracts, excluding usage, credits and billing errors.
+
+Invoice headers are one per dealership/month; invoice lines are charges and
+credits. Payments are attempts, potentially many per invoice. Count an invoice
+once, not once per line or attempt. Only Succeeded payment amounts are
+collections; Failed amounts are attempted, not collected.
+
+Outstanding means issued invoice total less successful payments through the
+reporting date. Overdue means a positive outstanding balance with DueDate
+strictly before November 3, 2026. October invoices due November 15 are not
+overdue. Compare dates and amounts, not the current system clock.
+
+The model has no active relationship from dealerships directly to invoices.
+Dealer filters don't automatically reach invoice headers or payments. When
+asked for dealer-level collections, use invoice DealershipID with an
+appropriate validated calculation; never repeat all-dealer totals under each
+dealer. Payments aren't allocated to products.
+
+Usage quantity is total units including the allowance. Expected overage is
+the positive units above IncludedUnits times OverageUnitPrice for each
+subscription and month. Compare expected overage with issued Usage invoice
+lines for the same subscription and month before aggregating.
+
+For an October usage spike compare October quantity with the average monthly
+quantity from January through September for that same subscription. More
+than five times baseline is a review candidate, not proof of wrongdoing.
+Check for overlapping entitled dealer/product contracts, recurring lines
+after an inclusive contract end date, recurring line prices above the
+contract rate, and unusually deep discounts relative to product list price.
+
+An auction cross-sell candidate is an active dealer with an entitled DMS
+subscription and no entitled Auction Access subscription on October 31.
+List-price opportunity is not booked revenue, forecast, or conversion.
+
+No taxes, margins, refunds, approval history, support incidents or external
+data are present. Don't invent causal explanations, fraud determinations or
+claims that a customer was contacted or a billing correction was made.
+If the model or question can't support an accurate calculation, say so.
 ```
 
-## 3. Data Agent: orchestration and response instructions
+In **Simplify data schema**, include the seven tables and the fields needed to answer the questions. Add descriptions from the [semantic model guide](semantic-model.md) and synonyms such as dealer/customer, subscription/contract, overdue/past due, and MRR/monthly recurring revenue. Keep the agent's selected table scope consistent with the model's AI schema. Hidden columns and AI schema selection do not enforce security.
+
+## 2. Data Agent: instructions
+
+In the agent configuration, add:
 
 ```text
 Objective: Help workshop participants investigate fictional dealership billing.
 
-Data source: Use only the Nowcom Billing Power BI semantic model attached to
-this agent. Retrieve results rather than answering from assumptions.
+Data source: Use the Nowcom Billing Power BI semantic model. Query the data
+instead of answering from assumptions.
 
-Responses: Give the requested period, metric definition, USD amounts or units,
-and a concise supporting table. Distinguish billed revenue, cash, outstanding
-balances, overdue balances, and contract run rate. Show supporting invoice or
-contract identifiers when useful and available.
+Responses: State the requested period, relevant metric definition, USD amounts
+or units, and a concise supporting table. Distinguish billed revenue, cash,
+outstanding balances, overdue balances and contract MRR. Include relevant
+invoice or contract identifiers when useful.
 
-Grounding: Describe data-quality or business-rule outliers as review candidates,
-not proven fraud or causal findings. Don't claim a refund, cancellation,
-collection, price change, or customer notification was executed. This agent
-only analyzes data. If a requested concept isn't represented, say so.
-
-Freshness: For live-change demonstrations, confirm the requested reporting
-date and acknowledge that replication/model visibility can lag source commits.
+Grounding: Treat outliers as review candidates, not proven fraud or causal
+findings. Don't claim a refund, cancellation, collection, price change or
+notification was executed. If a calculation is unsupported, explain the
+limitation rather than inventing an answer.
 ```
 
-These guide orchestration/response style; keep computational rules in the model. For model sources, don't treat SQL/KQL few-shot query inputs as DAX-generation examples. Optional **Verified answers** should be reviewed/configured in Prep for AI using real report/model outputs, not hardcoded expected numbers. First validate questions 1, 2, 8, 10, and 12; then evaluate the full twelve-question script.
+## 3. Published agent description
+
+Set the **agent's description** before publishing. The published description becomes its MCP tool description:
+
+```text
+Answers questions about fictional dealership subscriptions, billing, usage
+and payments for the Nowcom workshop. Data is in USD for January-October
+2026; the workshop reporting date is November 3, 2026.
+```
+
+This is the agent description, not a semantic-model data source description. Semantic-model sources use Prep for AI; Data Agent SQL/KQL example-query configuration doesn't apply to them. Test and refine the model using [the 12 prompts](demo-scenarios.md); don't assume instructions alone guarantee correct calculations.

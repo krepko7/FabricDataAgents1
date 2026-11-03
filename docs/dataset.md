@@ -1,157 +1,60 @@
-# Synthetic dealership billing dataset
+# Fictional dealership billing data
 
-## Design and scope
+All data is synthetic, including dealership names, subscriptions, amounts, and payment attempts. Billing email addresses use the reserved `.example` domain. Product names and prices are for illustration, not verified information about Nowcom.
 
-This is a fictional billing application inspired by the requested Nowcom demo, not extracted or reverse-engineered customer data. All accounts use reserved `.example` email addresses. Pricing and product names are illustrative. No payment-card numbers, credentials, VINs, or real contact records are included.
+The files contain column headers and comma-separated UTF-8 data. Dates use `yyyy-MM-dd`; `RecordedAt` uses an ISO date/time; decimals use a period. Empty `EndDate` and `FailureCode` cells mean no value. Data covers January-October 2026, with a fixed **November 3, 2026** reporting date and USD currency.
 
-The **seven tables are OLTP entities**, with integer primary keys, enforced foreign keys, unique business references, checks, and operational indexes. The normalized invoice header/detail structure is preserved. Usage is stored as a monthly meter settlement transaction, not one row per API call and not a dimensional warehouse fact. A larger production design would likely separate plans, contract amendments, tax, allocations, dunning, and event-level usage; those are deliberately out of scope.
+## Tables and grain
 
-## Fabric Mirroring column compatibility
-
-All **59 columns across the seven tables** use source types supported by Fabric Mirroring from Azure SQL Database and SQL Server. No column conversion or removal is needed:
-
-| SQL source type used | Purpose | Mirroring consideration |
+| File / table | Grain | Key columns and important fields |
 |---|---|---|
-| `int` | All primary/foreign keys, quantities, and terms | All seven primary keys are integers, avoiding unsupported key types and character-key collation issues. |
-| `char(2)`, `char(3)` | State and currency codes | Bounded character data. |
-| `varchar(n)` | Codes, statuses, and references | Bounded character data; no legacy text or MAX columns. |
-| `nvarchar(n)` | Dealer/product names, groups, and cities | Supported Unicode source text; replicated/endpoint representations need not preserve the source SQL type name. |
-| `decimal(12,2)` | Currency amounts and rates | Exact values; no floating-point currency conversions. |
-| `date` | Billing periods, entitlement dates, and payment dates | Calendar dates without a time-zone or fractional-second conversion. |
-| `datetime2(0)` | `UsageRecords.RecordedAt` | Explicit zero fractional digits, safely within Delta's six-digit precision limit; timestamps are interpreted as UTC. |
+| `Dealerships.csv` / `dealerships` | One customer account | `DealershipID`, `DealershipName`, `DealerGroup`, `City`, `StateCode`, `Region`, `AccountStatus`, `JoinedDate`, `BillingEmail`, `PaymentTermsDays` |
+| `Products.csv` / `products` | One catalog service | `ProductID`, `ProductCode`, `ProductName`, `Category`, `MonthlyListPrice`, `IncludedUnits`, `OverageUnitPrice`, `UsageUnit` |
+| `Subscriptions.csv` / `subscriptions` | One customer/product contract | `SubscriptionID`, `DealershipID`, `ProductID`, `StartDate`, `EndDate`, `SubscriptionStatus`, `MonthlyRate`, `IncludedUnits`, `OverageUnitPrice`, `ContractReference` |
+| `UsageRecords.csv` / `usagerecords` | One subscription/month settlement | `UsageRecordID`, `SubscriptionID`, `UsageMonth`, `Quantity`, `RecordedAt` |
+| `Invoices.csv` / `invoices` | One customer/month invoice | `InvoiceID`, `InvoiceNumber`, `DealershipID`, `BillingMonth`, `InvoiceDate`, `DueDate`, `CurrencyCode`, `InvoiceStatus`, `TotalAmount` |
+| `InvoiceLines.csv` / `invoicelines` | One charge or credit on an invoice | `InvoiceLineID`, `InvoiceID`, `SubscriptionID`, `ServiceMonth`, `LineType`, `Quantity`, `UnitPrice`, `LineAmount`, `ReasonCode` |
+| `Payments.csv` / `payments` | One payment attempt against an invoice | `PaymentID`, `InvoiceID`, `PaymentDate`, `Amount`, `PaymentStatus`, `PaymentMethod`, `FailureCode`, `ProcessorReference` |
 
-There are **no computed columns**, user-defined/CLR types, `rowversion`/`timestamp`, `xml`, `sql_variant`, spatial types, `hierarchyid`, legacy `text`/`ntext`/`image`, native `json`/`vector`, or unbounded LOB columns. No clustered columnstore, temporal history, ledger history, in-memory, graph, or external tables are used.
+The original CSVs are normalized operational data, not a pre-built dimensional model. They contain no SQL types or enforced constraints: loading them into Delta tables infers types and does not create database primary or foreign keys. Define relationships in the semantic model.
 
-Don't change `RecordedAt` to an unqualified `datetime2`: its SQL default is precision 7, and mirroring trims the seventh fractional digit. Precision-7 temporal key types also have key eligibility restrictions. The demo deliberately avoids both precision loss and unsupported columns being omitted.
+## Types to check after loading
 
-`sql\03_validate.sql` checks actual `sys.columns`/`sys.types` metadata before reconciling data and fails with the offending column names. Its conservative demo allowlist accepts integers/dates, bounded text, `decimal(12,2)`, and explicit `datetime2` precision 0-6; **it is not the full list of all types Fabric supports**. Offline schema tests prevent accidental unsupported types, implicit timestamp precision, or unparsed columns in source changes.
-
-Reviewed against Microsoft's [Azure SQL mirroring limitations](https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database-limitations) and [SQL Server mirroring limitations](https://learn.microsoft.com/en-us/fabric/mirroring/sql-server-limitations) on 2026-11-03. Type compatibility alone doesn't establish source eligibility: this workshop still targets **Azure SQL Database**. Mirroring a self-managed SQL Server instead requires its version-specific setup, permissions, networking, and CDC/replication prerequisites; LocalDB execution isn't proof of mirroring eligibility.
-
-## Data dictionary
-
-### Dealerships - one customer billing account
-
-| Columns | Meaning |
+| Columns | Intended interpretation |
 |---|---|
-| `DealershipID` | Integer primary key, 1-24 |
-| `DealershipName`, `DealerGroup` | Fictional customer and group labels |
-| `City`, `StateCode`, `Region` | Six US locations and four reporting regions |
-| `AccountStatus` | Customer account status; all seeded accounts are Active, even if an individual subscription ended |
-| `JoinedDate` | Account creation date, not a subscription start |
-| `BillingEmail` | Unique reserved-domain address |
-| `PaymentTermsDays` | 15 days for all seeded accounts |
+| All `...ID`, `Quantity`, `IncludedUnits`, `PaymentTermsDays` | Whole number; matching relationship keys must have the same type |
+| `...Date`, `BillingMonth`, `ServiceMonth`, `UsageMonth` | Date; blanks in `EndDate` are null |
+| `RecordedAt` | Date/time, interpreted as UTC |
+| `MonthlyListPrice`, `MonthlyRate`, `OverageUnitPrice`, `TotalAmount`, `UnitPrice`, `LineAmount`, `Amount` | Numeric amounts; USD, with two decimal places |
+| Names, codes, status, references, email, reason, city, region and state | Text; blanks in `FailureCode` are null |
 
-### Products - one catalog service
+The Lakehouse **Load to tables** dialog does not offer a custom column schema. Inspect the resulting table types before modeling. CSV inference can produce text or floating-point numbers; for example, `0.25` must be numeric, not text. For this demonstration, check numeric totals to the cent. Floating point isn't a substitute for fixed-precision currency in production. The [workshop troubleshooting section](workshop.md#troubleshooting) describes a no-code Dataflow Gen2 option if types aren't suitable.
 
-| Code | Illustrative service | Monthly list USD | Included units/month | Overage USD/unit |
-|---|---|---:|---:|---:|
-| WEB | Dealer Website | 199 | 0 | 0 |
-| AUCTION | Auction Access | 149 | 5 auctions | 15 |
-| BOOK | Vehicle Book Values | 89 | 100 lookups | 0.25 |
-| CRM | Dealer CRM | 299 | 0 | 0 |
-| DMS | Dealer Management System | 499 | 0 | 0 |
-| AUTOCHECK | AutoCheck Reports (demo) | 99 | 25 reports | 2 |
-| CARFAX | Carfax Reports (demo) | 149 | 50 reports | 10 |
+## Catalog
 
-`ProductID` is the primary key; `ProductCode` is unique. `ProductName`, `Category`, `MonthlyListPrice`, `IncludedUnits`, `OverageUnitPrice`, and `UsageUnit` describe the offer. Product list pricing isn't an invoice charge or the customer's negotiated contract price.
+| Service | List price/month | Included units | Overage price |
+|---|---:|---:|---:|
+| Dealer Website | $199 | N/A | N/A |
+| Auction Access | $149 | 5 auctions | $15/auction |
+| Vehicle Book Values | $89 | 100 lookups | $0.25/lookup |
+| Dealer CRM | $299 | N/A | N/A |
+| Dealer Management System | $499 | N/A | N/A |
+| AutoCheck Reports (demo) | $99 | 25 reports | $2/report |
+| Carfax Reports (demo) | $149 | 50 reports | $10/report |
 
-### Subscriptions - one customer/product contract
+The negotiated subscription rate can differ from list price. The `Quantity` in usage is total units, including the allowance; on a Usage invoice line it is billed **excess** units. A Credit line is negative.
 
-| Columns | Meaning |
-|---|---|
-| `SubscriptionID` | Explicit integer key; standard IDs = dealership ID * 100 + product ID |
-| `DealershipID`, `ProductID` | Foreign keys to customer and catalog |
-| `StartDate`, `EndDate` | Inclusive entitlement dates; blank end means open-ended |
-| `SubscriptionStatus` | Current Active, Cancelled, or Suspended state, not historical monthly status |
-| `MonthlyRate` | Negotiated base monthly fee used for contractual MRR |
-| `IncludedUnits`, `OverageUnitPrice` | Contract terms; seeded as copies of the original catalog terms |
-| `ContractReference` | Unique external-style contract reference |
+## Business definitions
 
-Overlapping customer/product contracts are intentionally not prohibited: Maple Grove Auto has a second CRM contract, ID `754`, from September. Real systems may have valid multiple contracts; treat the overlap as a review candidate, not proof of wrongdoing.
+- **Entitled on a date:** the subscription has started and its `EndDate` is blank or on/after that date. `EndDate` is inclusive; `SubscriptionStatus` is current, not a historical snapshot.
+- **Net billed:** signed issued invoice lines by service month. It's not cash or GAAP revenue recognition.
+- **Contract MRR:** negotiated recurring subscription rates for contracts entitled on the snapshot date. It excludes usage, credits, and billed-price mistakes.
+- **Cash collected:** successful payments only; failed rows are attempts, not cash.
+- **Outstanding:** invoice total minus successful payments through the reporting date. **Overdue:** positive outstanding balance with due date before November 3, 2026.
+- **Expected overage:** units above the contract allowance times the contract overage price, calculated per subscription/month. **Unbilled overage** compares this with actual Usage lines for the same subscription/month.
 
-### UsageRecords - one subscription/month meter settlement
+Don't add invoice totals after joining invoice lines or payment attempts: this repeats header totals. Failed payment retries can also repeat the same attempted amount. The data doesn't allocate invoice-level payments to products.
 
-`UsageRecordID` is the key; `(SubscriptionID, UsageMonth)` is unique. `Quantity` is the month's **total** usage, including the allowance. `RecordedAt` is the meter posting timestamp in UTC. Only metered, entitled subscriptions have usage records.
+## Planted review candidates
 
-Expected overage = `MAX(0, Quantity - Subscriptions.IncludedUnits) * Subscriptions.OverageUnitPrice`.
-
-### Invoices - one dealership/month invoice header
-
-`InvoiceID` and unique `InvoiceNumber` identify the invoice. `DealershipID` is a foreign key. `(DealershipID, BillingMonth)` is unique. `BillingMonth` is the first day of the service month; `InvoiceDate` is month-end and `DueDate` is 15 days later.
-
-`CurrencyCode` is USD. `InvoiceStatus` supports Issued and Void; all seed invoices are Issued. `TotalAmount` is a stored operational header total that reconciles to its lines. There is deliberately **no mutable Paid flag**: settlement derives from successful payments.
-
-### InvoiceLines - one billed charge or credit
-
-`InvoiceLineID` is the key. `InvoiceID` links the header and `SubscriptionID` links the contract. The invoice customer always matches the subscription customer.
-
-`ServiceMonth` identifies the billed service period. `LineType` is Recurring, Usage, or Credit. `Quantity * UnitPrice = LineAmount`; recurring and credit quantities are 1, usage quantities are billable excess units. Credits have negative prices/amounts. `ReasonCode` identifies MonthlyFee, MeteredOverage, or ServiceCredit.
-
-There is no redundant ProductID: reach the product through the contract. Do **not** sum invoice header totals after joining the lines; that multiplies the totals.
-
-### Payments - one processor payment attempt
-
-`PaymentID` is the key; `InvoiceID` is a foreign key. `PaymentDate`, `Amount`, and `PaymentMethod` describe the attempt; seeded methods are ACH. `ProcessorReference` is unique.
-
-`PaymentStatus` is Succeeded or Failed; failed attempts have `FailureCode = InsufficientFunds`. A failed attempt's positive Amount is the **attempted** amount, never collected cash. Coastal Bend Auto has three retries on each of two invoices. Prairie View Cars has two successful installments for its October invoice. Blue Canyon Auto's September invoice is half-paid.
-
-## Billing and reporting rules
-
-| Concept | Definition |
-|---|---|
-| Reporting date | 2026-11-03; no `GETDATE()`/`TODAY()` in baseline answers |
-| Service coverage | January 1 through October 31, 2026; no November invoices |
-| Monthly billing | In arrears, no proration, one customer invoice per month |
-| Contract terms | Unchanged within each seeded contract; no rate/allowance version history |
-| Entitled on date D | `StartDate <= D AND (EndDate IS NULL OR EndDate >= D)` |
-| Contract MRR | Sum entitled negotiated monthly base rates on a snapshot date; exclude usage, credits, and incorrect billing |
-| Net billed revenue | Signed issued invoice lines by service month; demo billing metric, **not GAAP revenue recognition** |
-| Collected cash | Succeeded payments dated on/before reporting date |
-| Outstanding | Issued invoice total less successful payments, evaluated once per invoice |
-| Overdue | Positive outstanding balance with `DueDate < reporting date` |
-| Not yet due | October invoices are due November 15 and are **not overdue** on November 3 |
-| Credit | Negative invoice line, not a payment/refund |
-| Growth opportunity | List-price opportunity only, not pipeline, booked revenue, or predicted conversion |
-
-The post-cancellation and pricing defects are intentional **business-rule anomalies**, not broken referential integrity or unbalanced books. The source schema does not enforce every cross-table business rule; reconciliation checks protect the supplied dataset.
-
-## Loading
-
-The recommended path is `scripts\Load-Demo.ps1`, as shown in the root README. Run against an empty, dedicated **Azure SQL Database**. This workshop uses Azure SQL as the source, not a Fabric SQL database, SQL Server traditional database mirroring, or Azure SQL Managed Instance.
-
-Load order is Dealerships, Products, Subscriptions, UsageRecords, Invoices, InvoiceLines, Payments. The generated `sql\02_seed.sql` respects foreign keys and inserts at most 500 rows per INSERT. Its single transaction rolls back on any error and refuses to seed nonempty demo tables. Schema creation is also transactional and refuses existing demo objects.
-
-The schema and seed are separate operations: if seeding fails, empty schema tables remain, and the seed can be retried after resolving the error. The full loader deliberately refuses to rerun schema creation; use the seed script alone only when all seven tables are confirmed empty.
-
-CSVs in `data\` are an optional alternative for customer-preferred import tools. They are UTF-8, comma-delimited, headered, LF-terminated, with ISO dates, decimal-point currency, and blank nullable fields. **Do not import CSVs after running the seed SQL.** Use the supplied typed schema and map blank `EndDate` and `FailureCode` to SQL NULL. No CSV import tool is assumed or required.
-
-Every key is explicit, not IDENTITY. For new source transactions use unique IDs; `sql\04_live_payment.sql` demonstrates this under locking.
-
-## Rebuilding and extending
-
-```powershell
-python .\scripts\generate_data.py
-python -m unittest discover -s tests -v
-```
-
-The generator is deterministic and uses exact Decimal arithmetic. It writes seven CSVs, `data\manifest.json`, and `sql\02_seed.sql`; no random seed or package install is needed. It doesn't overwrite the hand-maintained answer key `data\expected_results.json`. If you change dates, prices, or fixtures, intentionally review and update SQL scenarios, DAX, documentation, tests, and the answer key together.
-
-## Validation
-
-Offline tests use a temporary in-memory SQLite database for the SELECT-only scenarios plus independent Decimal reconciliation. They do **not** prove T-SQL DDL or DAX compatibility. To validate actual SQL execution, first load an isolated SQL Server/Azure SQL test database and run:
-
-```powershell
-$env:NOWCOM_TEST_SQLSERVER = '<server>.database.windows.net'
-$env:NOWCOM_TEST_DATABASE = 'NowcomBillingDemo'
-$env:NOWCOM_TEST_ENTRA = '1'
-python -m unittest discover -s tests -v
-```
-
-For an already loaded local SQL Server instance with Windows authentication, omit `NOWCOM_TEST_ENTRA`. Integration tests run reconciliation and all 12 T-SQL queries, compare SQL Server JSON output to the answer key, verify reload refusal, and exercise the live payment inside a rolled-back transaction. Use a disposable baseline database, not production or a shared active workshop database. They don't create or delete databases and leave the baseline data intact. They require Microsoft's ODBC `sqlcmd` CLI with `-y 0` support.
-
-`sql\03_validate.sql` can also be run directly on Azure SQL. Verify the seven row counts against `data\manifest.json`, not the preview UI's first 1,000 rows. The seed/queries have been exercised with SQL Server LocalDB; Azure SQL/Fabric connectivity, permissions, replication, and DAX still require the workshop's cloud checkpoints.
-
-## Reset and cleanup
-
-No automatic destructive reset is provided. For another baseline rehearsal use a new dedicated database and a new mirrored item, or have the resource owner explicitly approve disposal/recreation of the prior demo resources. Don't delete customer resources, disable shared tenant settings, or drop production tables. Stop or remove only dedicated resources you own when the workshop ends, following organizational retention and cost policies.
+The data includes a duplicate contract, charges after cancellation, extreme usage, unbilled usage, a deep discount, an overcharge, failed payment retries, a partial payment, a suspended subscription, and a service credit. See the [12 questions and answer key](demo-scenarios.md). These examples are review candidates, not proof of wrongdoing or a real customer problem.
