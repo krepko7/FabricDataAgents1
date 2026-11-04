@@ -4,6 +4,15 @@ A no-code workshop using seven **fictional** Nowcom-themed dealership billing CS
 
 **These are synthetic data and illustrative product names and prices, not real Nowcom customers or verified Nowcom offerings.** AutoCheck and Carfax are included as requested demo categories; no vendor integration or endorsement is implied.
 
+## Choose your workshop
+
+| Resource | Time | Data and scope |
+|---|---|---|
+| [**Workshop Express**](workshop-express/README.md) | 60-75 minutes | **One CSV and one table**; Lakehouse upload, semantic model, Prep for AI, Data Agent instructions, and 12 copy-ready questions |
+| [Full workshop](docs/workshop.md) | 3 hours | Seven operational-style CSVs, model relationships, Data Agent, 12 questions, and MCP clients |
+
+Express is a separate, consolidated resource; the original seven-table workshop remains unchanged. Start with [Workshop Express](workshop-express/README.md) for the quickest lab.
+
 ## Workshop agenda (3 hours)
 
 | Time | Topic | Outcome |
