@@ -21,6 +21,7 @@ Capacity provisioning, tenant approvals, and sign-in should be completed beforeh
 
 | Resource | Purpose |
 |---|---|
+| [Workshop Express PowerPoint](Workshop-Express.pptx) | 20-slide facilitator deck with editable architecture graphic, lab steps, and question/answer speaker notes |
 | [NowcomBillingExpress.csv](data/NowcomBillingExpress.csv) | The **only** data file to upload: 1,262 rows and 32 columns |
 | [Data dictionary](dataset.md) | Grain, types, precomputed metrics, and limitations |
 | [Copy-ready AI instructions](ai-instructions.md) | Separate semantic model and Data Agent instructions |
