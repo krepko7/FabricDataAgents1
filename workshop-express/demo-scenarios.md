@@ -1,4 +1,4 @@
-# Workshop Express: 12 Data Agent questions
+# Workshop Express with file upload: 12 Data Agent questions
 
 Use the **copy icon** on each text block to paste the question into the Data Agent. Expected answers below are for the provided Express CSV, not live customer data. All amounts are USD; the fixed reporting date is November 3, 2026.
 

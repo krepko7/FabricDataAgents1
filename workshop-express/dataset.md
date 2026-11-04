@@ -1,6 +1,6 @@
-# Workshop Express data dictionary
+# Workshop Express with file upload data dictionary
 
-Use only [NowcomBillingExpress.csv](data/NowcomBillingExpress.csv). It is a comma-delimited UTF-8 file with headers, **1,262 rows and 32 columns**, derived from the full workshop's unchanged synthetic CSVs. No participant scripts are required.
+Use only [NowcomBillingExpress.csv](data/NowcomBillingExpress.csv). It is a comma-delimited UTF-8 file with headers, **1,262 rows and 32 columns**, derived from the unchanged synthetic CSVs in Workshop with file upload. No participant scripts are required.
 
 **Grain:** one subscription/month, uniquely identified by `MonthStart` plus `SubscriptionID`. Rows begin in the subscription's start month and continue through October 2026, including ended contracts with zero month-end entitlement. Dealer and product labels are denormalized. Dates use `yyyy-MM-dd`; decimals use a period.
 
@@ -57,6 +57,6 @@ Dates, numeric amounts, and flags must load with appropriate types. The Lakehous
 - **Cross-sell:** filter one month and `DMSWithoutAuctionFlag = 1`, then count distinct dealerships. There is one eligible DMS contract per candidate in this file. Price opportunity uses Auction Access list price **$149/month**, not the selected DMS price; it isn't a forecast.
 - **Review candidates:** anomaly metrics are precomputed teaching aids, not proof of wrongdoing, approved refunds, or causal explanations. No machine-learning anomaly detection is performed.
 
-The fixed reporting date is **November 3, 2026**, with January-October history in USD. Dealerships, service labels, contracts, and prices are synthetic. No invoice identifiers, payment attempts, outstanding balances, overdue measures, taxes, margins, or approval history are included. Don't try to answer the full workshop's collections questions from this table.
+The fixed reporting date is **November 3, 2026**, with January-October history in USD. Dealerships, service labels, contracts, and prices are synthetic. No invoice identifiers, payment attempts, outstanding balances, overdue measures, taxes, margins, or approval history are included. Don't try to answer the collections questions from Workshop with file upload using this table.
 
 For production, retain governed transaction detail, explicit measures, appropriate dimensional/date modeling, precise currency types, security, and refresh logic. Express intentionally trades that breadth for one upload and straightforward questions.

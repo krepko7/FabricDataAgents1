@@ -1,4 +1,4 @@
-# Workshop Express AI instructions
+# Workshop Express with file upload AI instructions
 
 Use the two blocks in their respective configuration screens. **Model Prep for AI** supplies metric semantics for DAX generation; **agent instructions** control routing and response style. Don't substitute one for the other or paste the answer key into either.
 
@@ -91,7 +91,7 @@ question cannot be supported accurately, explain the limitation.
 If publishing, use this **agent description**:
 
 ```text
-Answers questions about the Workshop Express fictional dealership billing
+Answers questions about the Workshop Express with file upload fictional dealership billing
 dataset: monthly billed charges, contract MRR, usage, credits, and precomputed
 review candidates. January-October 2026, USD. No payment or collections data.
 ```

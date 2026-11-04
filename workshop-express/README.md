@@ -1,4 +1,4 @@
-# Workshop Express
+# Workshop Express with file upload
 
 **One CSV, one Lakehouse table, one semantic model, one Data Agent.** This shorter version of the Nowcom workshop uses a consolidated monthly subscription/billing dataset, so participants upload and load only one file and don't configure model relationships.
 
@@ -15,13 +15,13 @@ The data is **fictional**. Dealerships, prices, and product labels are illustrat
 | 40-60 | Try the 12 questions, dividing them among teams if needed |
 | 60-75 | Optional extra time to compare answers and discuss findings |
 
-Capacity provisioning, tenant approvals, and sign-in should be completed beforehand. This resource does **not** include mirroring, pipelines, notebooks, SQL/Python scripts, relationship building, or MCP setup. The [full workshop](../docs/workshop.md) remains available separately.
+Capacity provisioning, tenant approvals, and sign-in should be completed beforehand. This resource does **not** include mirroring, pipelines, notebooks, SQL/Python scripts, relationship building, or MCP setup. The [Workshop with file upload](../docs/workshop.md) remains available separately.
 
 ## Resources
 
 | Resource | Purpose |
 |---|---|
-| [Workshop Express PowerPoint](Workshop-Express.pptx) | 20-slide facilitator deck with editable architecture graphic, lab steps, and question/answer speaker notes |
+| [Workshop Express with file upload PowerPoint](Workshop-Express.pptx) | 20-slide facilitator deck with editable architecture graphic, lab steps, and question/answer speaker notes |
 | [NowcomBillingExpress.csv](data/NowcomBillingExpress.csv) | The **only** data file to upload: 1,262 rows and 32 columns |
 | [Data dictionary](dataset.md) | Grain, types, precomputed metrics, and limitations |
 | [Copy-ready AI instructions](ai-instructions.md) | Separate semantic model and Data Agent instructions |
@@ -54,7 +54,7 @@ Use USD and a fixed reporting date of **November 3, 2026**. Filter to a single m
 
 **Checkpoint:** one Delta table with **1,262 rows**. The preview may show only 1,000; verify the full count in a report in step 3. Don't use **Append** to rerun this load, because it duplicates rows. Uploading a changed CSV does not automatically refresh its Delta table.
 
-The loader infers types and doesn't offer a custom column schema. If dates or numeric fields load incorrectly, stop and use the [full workshop's no-code type-correction guidance](../docs/workshop.md#troubleshooting), then use the corrected table. Formatting text as currency doesn't convert it into numbers. For production currency, use a governed fixed-precision ingestion process rather than relying on CSV inference.
+The loader infers types and doesn't offer a custom column schema. If dates or numeric fields load incorrectly, stop and use the [Workshop with file upload no-code type-correction guidance](../docs/workshop.md#troubleshooting), then use the corrected table. Formatting text as currency doesn't convert it into numbers. For production currency, use a governed fixed-precision ingestion process rather than relying on CSV inference.
 
 ## 3. Create the semantic model and Prep for AI
 

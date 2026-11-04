@@ -1,4 +1,4 @@
-# Workshop: CSV files to Fabric Data Agent insights
+# Workshop with file upload
 
 ## What you'll build
 

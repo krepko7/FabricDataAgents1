@@ -8,10 +8,10 @@ A no-code workshop using seven **fictional** Nowcom-themed dealership billing CS
 
 | Resource | Time | Data and scope |
 |---|---|---|
-| [**Workshop Express**](workshop-express/README.md) | 60-75 minutes | **One CSV and one table**; Lakehouse upload, semantic model, Prep for AI, Data Agent instructions, and 12 copy-ready questions |
-| [Full workshop](docs/workshop.md) | 3 hours | Seven operational-style CSVs, model relationships, Data Agent, 12 questions, and MCP clients |
+| [**Workshop Express with file upload**](workshop-express/README.md) | 60-75 minutes | **One CSV and one table**; Lakehouse upload, semantic model, Prep for AI, Data Agent instructions, and 12 copy-ready questions |
+| [Workshop with file upload](docs/workshop.md) | 3 hours | Seven operational-style CSVs, model relationships, Data Agent, 12 questions, and MCP clients |
 
-Express is a separate, consolidated resource; the original seven-table workshop remains unchanged. Start with [Workshop Express](workshop-express/README.md) for the quickest lab.
+Express is a separate, consolidated resource; the original seven-table workshop remains unchanged. Start with [Workshop Express with file upload](workshop-express/README.md) for the quickest lab.
 
 ## Workshop agenda (3 hours)
 
