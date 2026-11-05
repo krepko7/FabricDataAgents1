@@ -22,7 +22,7 @@ Capacity provisioning, tenant approvals, and sign-in should be completed beforeh
 | Resource                                                              | Purpose                                                                                                    |
 | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | [Workshop Express with file upload PowerPoint](Workshop-Express.pptx) | 20-slide facilitator deck with editable architecture graphic, lab steps, and question/answer speaker notes |
-| [DealershipBilling.csv](data/DealershipBilling.csv)             | The **only** data file to upload: 1,262 rows and 32 columns                                                |
+| [DealershipBilling.csv](data/DealershipBilling.csv)                   | The **only** data file to upload: 1,262 rows and 32 columns                                                |
 | [Data dictionary](dataset.md)                                         | Grain, types, precomputed metrics, and limitations                                                         |
 | [Copy-ready AI instructions](ai-instructions.md)                      | Separate semantic model and Data Agent instructions                                                        |
 | [12 copy-ready questions and answer key](demo-scenarios.md)           | Test the agent and check results                                                                           |
@@ -61,9 +61,10 @@ The loader infers types and doesn't offer a custom column schema. If dates or nu
 1. In the Lakehouse ribbon select **New Power BI semantic model** (sometimes **New semantic model**).
 2. Name it `Dealership Billing SM`, select your workshop workspace, select **only `dealershipbilling`**, and confirm. This creates a Direct Lake semantic model.
 3. Open its model editor. Keep the single table; **no relationships or additional tables are required**.
-4. OPTIONAL: Check the column types against the [dictionary](dataset.md). Set `SubscriptionID`, flags, contract rates, list prices, allowances, and ratios to **Don't summarize** by default.
-5. OPTIONAL: Format the monetary fields as USD with two decimal places. Format `DiscountPercent` as **Percentage** with two decimal places, not currency: the stored value `0.60120240` means **60.12%**. Format `UsageMultiple` as a decimal, not a percent.
-6. Select **Prep data for AI** in the model editor. In **AI instructions**, paste the [semantic model instructions](ai-instructions.md#semantic-model-prep-for-ai).
+4. Select **Prep data for AI** in the model editor. In **AI instructions**, paste the [semantic model instructions](ai-instructions.md#semantic-model-prep-for-ai).
+
+5. OPTIONAL: Check the column types against the [dictionary](dataset.md). Set `SubscriptionID`, flags, contract rates, list prices, allowances, and ratios to **Don't summarize** by default.
+6. OPTIONAL: Format the monetary fields as USD with two decimal places. Format `DiscountPercent` as **Percentage** with two decimal places, not currency: the stored value `0.60120240` means **60.12%**. Format `UsageMultiple` as a decimal, not a percent.
 
 **Checkpoint:** one model table, no relationships, and matching report checks. This quick lab uses precomputed numeric columns and simple aggregations, not a production semantic layer with explicit measures or a calendar. Agent-generated DAX still needs evaluation; instructions alone don't guarantee correct answers.
 
@@ -88,11 +89,19 @@ Check amounts, periods, signs, units, and customer/product sets. Outliers are **
 
 ## 6. Run ad-hoc SQL
 
-1. Click your workspace on the left menu, then click the link for the
+1. Click your workspace on the left menu, then click the link for the DealershipLH of type "SQL Analytics Endpoint".
+2. Pick "New SQL Query" from the menu and run the query (or similar) select top 10 \* from dealershipbilling.
+3. Pick "New SQL Query" from the menu again and pick "New Visual Query".
+4. Expand the tables on the left in the Explorer menu and drag the table dealershipbilling to the query canvas.
+5. Click the blue + sign to the right of the table icon in the query canvas and pick "keep rows" and enter a number like 10.
+6. You will see the results of your visual query below.
 
-## 7. Create a report
+## 7. Auto-Create a report
 
-1. Create a simple report from the model. Add a table visual with `MonthStart` and **Sum of `NetBilled`**; October 1, 2026 must show **$66,728.00**. With the October filter, **Sum of `ContractMRR`** must show **$29,956.00** and **Sum of `EntitledAtMonthEnd`** must show **124**. Remove the month filter and use **Count of `SubscriptionID`**, not distinct count, to check **1,262 rows**.
+1. Click back to your workspace menu on the far left menu.
+2. Pick the 'Dealership Billing SM' semantic model.
+3. Now click "New report" in the top right menu.
+4.
 
 ## References
 
