@@ -140,24 +140,8 @@ Check amounts, periods, signs, units, and customer/product sets. Outliers are **
    month-end contract MRR, and entitled contract count.
    ```
 
-4. Review Copilot's suggestions, then ask it to create the billing overview page. Use this copy-ready prompt to specify the fields, period, and aggregations:
-
-   ```text
-   Create a new report page titled October 2026 Billing Overview.
-   Filter the whole page to dealershipbilling[MonthStart] = October 1, 2026.
-   Add cards for SUM(NetBilled), SUM(ContractMRR), and SUM(EntitledAtMonthEnd)
-   from dealershipbilling.
-   Add a chart of SUM(dealershipbilling[NetBilled]) by products[ProductName],
-   a chart of net billed amounts by dealershipbilling[DealershipName],
-   and a slicer using products[ProductName].
-   Use the existing ProductID relationship. Show monetary amounts in USD.
-   NetBilled is billed charges, not cash collected. MRR and entitled count
-   are single-month snapshots; do not sum them across months.
-   ```
-
-5. Inspect the generated page and its filters. Ask Copilot to add or change any missing visuals; adjust formatting manually if necessary. Copilot output can vary and isn't guaranteed to use the correct aggregation or month.
-6. With October selected and no product selection, confirm **$66,728.00 NetBilled**, **$29,956.00 ContractMRR**, and **124 entitled contracts**. Compare the product chart with [question 1](demo-scenarios.md#1-october-billing-and-product-mix). Select **Dealer Website** in the product slicer: NetBilled must become **$4,776.00**. If every product shows the grand total, check the active ProductID relationship and the product field used in the visual. Clear the slicer after checking.
-7. Select **Save**, name the report **`Dealership Billing Overview`**, and save it in your approved workshop workspace.
+4. Inspect the generated page and its filters. Ask Copilot to add or change any missing visuals; adjust formatting manually if necessary. Copilot output can vary and isn't guaranteed to use the correct aggregation or month.
+5. Select **Save**, name the report **`Dealership Billing Overview`**, and save it in your approved workshop workspace.
 
 **If Copilot isn't available:** ask the facilitator to confirm the eligible paid capacity, Copilot tenant settings, regional availability, and your report/model permissions. Copilot report creation also requires the model's **Q&A feature switch** enabled and **implicit measures** not disabled. Don't change tenant settings yourself. For an optional full-row check, use an unfiltered report visual with **Count of `dealershipbilling[SubscriptionID]`**, not distinct count: expect **1,262**.
 
