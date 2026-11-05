@@ -1,6 +1,6 @@
 # Workshop Express with file upload data dictionary
 
-Use only [AutomobileBilling.csv](data/AutomobileBilling.csv). It is a comma-delimited UTF-8 file with headers, **1,262 rows and 32 columns**, derived from the unchanged synthetic CSVs in Workshop with file upload. No participant scripts are required.
+Use only [DealershipBilling.csv](data/DealershipBilling.csv). It is a comma-delimited UTF-8 file with headers, **1,262 rows and 32 columns**, derived from the unchanged synthetic CSVs in Workshop with file upload. No participant scripts are required.
 
 **Grain:** one subscription/month, uniquely identified by `MonthStart` plus `SubscriptionID`. Rows begin in the subscription's start month and continue through October 2026, including ended contracts with zero month-end entitlement. Dealer and product labels are denormalized. Dates use `yyyy-MM-dd`; decimals use a period.
 

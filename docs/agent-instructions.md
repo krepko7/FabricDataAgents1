@@ -6,11 +6,11 @@ Don't paste the facilitator answer key into either layer. The agent should query
 
 ## 1. Semantic model: Prep data for AI
 
-Open the `Automobile Billing` semantic model, select **Prep data for AI**, and add these AI instructions:
+Open the `Dealership Billing` semantic model, select **Prep data for AI**, and add these AI instructions:
 
 ```text
 This model contains fictional dealership subscriptions, usage, invoices and
-payments. Product names and prices are illustrative, not verified Automobile data.
+payments. Product names and prices are illustrative, not verified Dealership data.
 Amounts are USD. Billing history covers January through October 2026. Use
 November 3, 2026 as the fixed reporting date rather than today's date.
 
@@ -70,7 +70,7 @@ In the agent configuration, add:
 ```text
 Objective: Help workshop participants investigate fictional dealership billing.
 
-Data source: Use the Automobile Billing Power BI semantic model. Query the data
+Data source: Use the Dealership Billing Power BI semantic model. Query the data
 instead of answering from assumptions.
 
 Responses: State the requested period, relevant metric definition, USD amounts
@@ -90,7 +90,7 @@ Set the **agent's description** before publishing. The published description bec
 
 ```text
 Answers questions about fictional dealership subscriptions, billing, usage
-and payments for the Automobile workshop. Data is in USD for January-October
+and payments for the Dealership workshop. Data is in USD for January-October
 2026; the workshop reporting date is November 3, 2026.
 ```
 

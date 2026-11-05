@@ -5,7 +5,7 @@ This lab models the seven Lakehouse tables directly. It deliberately keeps the o
 ## Create and inspect
 
 1. After all seven CSVs are loaded as tables, open the Lakehouse and select **New Power BI semantic model** on its ribbon (the label can appear as **New semantic model**).
-2. Name it `Automobile Billing`, choose the workshop workspace, select all seven lowercase tables, and confirm. Fabric creates a Direct Lake semantic model.
+2. Name it `Dealership Billing`, choose the workshop workspace, select all seven lowercase tables, and confirm. Fabric creates a Direct Lake semantic model.
 3. Open **Open data model** if the model editor doesn't open automatically. Default semantic models aren't automatically created for new Lakehouses.
 4. Inspect column types. Keys on both sides of each relationship must have matching types, dates must be dates, and amounts must be numeric. See [type checks](dataset.md#types-to-check-after-loading).
 5. In model properties, set IDs to **Don't summarize**, format monetary columns as USD with two decimal places, and add descriptions. These settings don't change source data or its precision.

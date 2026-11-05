@@ -4,13 +4,13 @@ Use the two blocks in their respective configuration screens. **Model Prep for A
 
 ## Semantic model: Prep for AI
 
-In the `Automobile Billing SM` semantic model, open **Prep data for AI > AI instructions**, review and paste:
+In the `Dealership Billing SM` semantic model, open **Prep data for AI > AI instructions**, review and paste:
 
 ```text
-Use automobilebilling for fictional dealership subscription and billing
+Use dealershipbilling for fictional dealership subscription and billing
 analysis. Data covers January-October 2026 in USD. The reporting date is
 November 3, 2026, not today's date. Product labels and prices are illustrative,
-not verified Automobile offerings or customer information.
+not verified Dealership offerings or customer information.
 
 Grain is one subscription per service month, uniquely identified by MonthStart
 and SubscriptionID. The same contract repeats across months. MonthStart is
@@ -65,16 +65,16 @@ unsupported metrics, causes, or actions. Treat anomalies as review candidates,
 not proven fraud. Query the data rather than memorizing expected answers.
 ```
 
-In the **AI data schema / Simplify data schema**, include `automobilebilling` and the columns used by these questions. Suggested synonyms: `DealershipName` = dealer/customer; `NetBilled` = billed revenue/net billing; `ContractMRR` = monthly recurring revenue/run rate; `UnbilledOverage` = unbilled usage gap. Preserve the actual column names to match this resource.
+In the **AI data schema / Simplify data schema**, include `dealershipbilling` and the columns used by these questions. Suggested synonyms: `DealershipName` = dealer/customer; `NetBilled` = billed revenue/net billing; `ContractMRR` = monthly recurring revenue/run rate; `UnbilledOverage` = unbilled usage gap. Preserve the actual column names to match this resource.
 
 ## Data Agent instructions
 
-In `Automobile Analyst`, paste into the agent instructions:
+In `Dealership Analyst`, paste into the agent instructions:
 
 ```text
 Help participants investigate fictional dealership subscriptions and billing.
-Use only the Automobile Billing SM Power BI semantic model. Query its
-automobilebilling table; don't answer from assumptions or external sources.
+Use only the Dealership Billing SM Power BI semantic model. Query its
+dealershipbilling table; don't answer from assumptions or external sources.
 
 State the requested month or period, metric definition, USD amounts or units,
 and a concise supporting table. Use the model's Prep for AI business rules.

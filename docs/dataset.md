@@ -1,6 +1,6 @@
 # Fictional dealership billing data
 
-All data is synthetic, including dealership names, subscriptions, amounts, and payment attempts. Billing email addresses use the reserved `.example` domain. Product names and prices are for illustration, not verified information about Automobile.
+All data is synthetic, including dealership names, subscriptions, amounts, and payment attempts. Billing email addresses use the reserved `.example` domain. Product names and prices are for illustration, not verified information about Dealership.
 
 The files contain column headers and comma-separated UTF-8 data. Dates use `yyyy-MM-dd`; `RecordedAt` uses an ISO date/time; decimals use a period. Empty `EndDate` and `FailureCode` cells mean no value. Data covers January-October 2026, with a fixed **November 3, 2026** reporting date and USD currency.
 
