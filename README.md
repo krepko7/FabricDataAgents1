@@ -1,8 +1,8 @@
 # From data to insights with Fabric Data Agents
 
-Choose a file-upload or Azure SQL mirroring workshop using **fictional** Nowcom-themed dealership billing data. Create a semantic model and explore the data with a Fabric Data Agent. The three-hour editions also call the published Data Agent from an MCP client.
+Choose a file-upload or Azure SQL mirroring workshop using **fictional** Automobile-themed dealership billing data. Create a semantic model and explore the data with a Fabric Data Agent. The three-hour editions also call the published Data Agent from an MCP client.
 
-**These are synthetic data and illustrative product names and prices, not real Nowcom customers or verified Nowcom offerings.** AutoCheck and Carfax are included as requested demo categories; no vendor integration or endorsement is implied.
+**These are synthetic data and illustrative product names and prices, not real Automobile customers or verified Automobile offerings.** AutoCheck and Carfax are included as requested demo categories; no vendor integration or endorsement is implied.
 
 ## Choose your workshop
 
@@ -10,7 +10,7 @@ Choose a file-upload or Azure SQL mirroring workshop using **fictional** Nowcom-
 |---|---|---|
 | [**Workshop Express with file upload**](workshop-express/README.md) | 60-75 minutes | **One CSV and one table**; Lakehouse upload, semantic model, Prep for AI, Data Agent instructions, and 12 copy-ready questions |
 | [Workshop with file upload](docs/workshop.md) | 3 hours | Seven operational-style CSVs, model relationships, Data Agent, 12 questions, and MCP clients |
-| [Workshop with mirroring](docs/workshop-mirroring.md) | 3 hours | Mirror seven tables from Azure SQL Database `nowcom` on `kirbysqlserver2.database.windows.net`, then model, configure the agent, try 12 questions, and use MCP |
+| [Workshop with mirroring](docs/workshop-mirroring.md) | 3 hours | Mirror seven tables from Azure SQL Database `automobile` on `kirbysqlserver2.database.windows.net`, then model, configure the agent, try 12 questions, and use MCP |
 
 Express is a separate, consolidated resource; the original seven-table workshop remains unchanged. Start with [Workshop Express with file upload](workshop-express/README.md) for the quickest lab.
 
@@ -42,7 +42,7 @@ Capacity provisioning and tenant approvals should be completed before the worksh
 | 02:35-02:55 | Connect the Data Agent as an MCP server | Discover and call the published agent from an MCP client |
 | 02:55-03:00 | Wrap-up | Discuss replication, permissions, and next steps |
 
-Use the [mirroring guide](docs/workshop-mirroring.md) for the supplied server/database and administrator prerequisites. Configure **one shared mirror** of `nowcom`; don't create competing mirrors in each participant's workspace. The source schema and data haven't been verified live. This edition doesn't require CSV upload or a separate Lakehouse.
+Use the [mirroring guide](docs/workshop-mirroring.md) for the supplied server/database and administrator prerequisites. Configure **one shared mirror** of `automobile`; don't create competing mirrors in each participant's workspace. The source schema and data haven't been verified live. This edition doesn't require CSV upload or a separate Lakehouse.
 
 ## Workshop resources
 

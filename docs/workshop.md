@@ -11,7 +11,7 @@ There is no SQL database or mirroring in this workshop. Uploading and loading fi
 | Time | Topic | Outcome |
 |---|---|---|
 | 00:00-00:15 | Introduction to Fabric | Understand workspace, OneLake, Lakehouse, semantic model, and Data Agent |
-| 00:15-00:30 | Create a workspace and Lakehouse | Create a capacity-backed workspace and `NowcomBilling` Lakehouse |
+| 00:15-00:30 | Create a workspace and Lakehouse | Create a capacity-backed workspace and `AutomobileBilling` Lakehouse |
 | 00:30-01:05 | Upload CSVs and create tables | Seven CSVs uploaded and loaded as Delta tables; inspect types |
 | 01:05-01:35 | Create a semantic model | Create and validate six relationships and simple report checks |
 | 01:35-02:00 | Create and configure a Data Agent | Add the model, apply AI instructions, and publish |
@@ -47,7 +47,7 @@ Data Agents are conversational query tools, not autonomous proof of why an anoma
 ## 2. Create a workspace
 
 1. In Fabric, select **Workspaces** in the left navigation, then **New workspace**.
-2. Name it `Nowcom Billing Workshop` (add a unique suffix if needed).
+2. Name it `Automobile Billing Workshop` (add a unique suffix if needed).
 3. Expand **Advanced**. Choose an available eligible Fabric capacity or qualifying Premium capacity; select **Apply**.
 4. If capacity selection isn't offered during creation, open workspace **Settings > Workspace type**, select **Edit**, and choose the approved capacity. Ask your admin if no eligible capacity is available.
 5. Confirm the workspace is on that capacity and that you can create items. Don't change tenant settings or share the workspace more broadly without approval.
@@ -57,7 +57,7 @@ Data Agents are conversational query tools, not autonomous proof of why an anoma
 ## 3. Create a Lakehouse
 
 1. Open the workspace and select **New item**.
-2. Search for **Lakehouse**, select it, enter `NowcomBilling`, and select **Create**.
+2. Search for **Lakehouse**, select it, enter `AutomobileBilling`, and select **Create**.
 3. Wait for the Lakehouse explorer. Locate **Files** and **Tables**.
 
 **Checkpoint:** the new Lakehouse opens with both sections visible.
@@ -100,7 +100,7 @@ Expand **Tables**, select each table, and inspect its preview and column types. 
 ## 6. Create a semantic model
 
 1. From the Lakehouse ribbon select **New Power BI semantic model** (sometimes labeled **New semantic model**).
-2. Name it `Nowcom Billing`, choose the workshop workspace, select all seven tables, and confirm.
+2. Name it `Automobile Billing`, choose the workshop workspace, select all seven tables, and confirm.
 3. Open its model editor. In model view, remove conflicting auto-detected relationships and add the six active single-direction relationships in the [semantic model guide](semantic-model.md#relationships).
 4. Verify data types and descriptions; use the [no-code report checks](semantic-model.md#check-the-data-without-code). October's signed billed amount should be **$66,728.00**.
 5. Save the model. In **Prep data for AI**, apply the model-specific instructions in [AI instructions](agent-instructions.md) and review the AI data schema.
@@ -110,12 +110,12 @@ Expand **Tables**, select each table, and inspect its preview and column types. 
 ## 7. Create and publish the Data Agent
 
 1. In the workspace, select **New item** and search for **Fabric data agent**.
-2. Name it `Nowcom Billing Analyst`.
-3. In the OneLake catalog, select the `Nowcom Billing` **Power BI semantic model**, then **Add**. Use only that source for this exercise.
+2. Name it `Automobile Billing Analyst`.
+3. In the OneLake catalog, select the `Automobile Billing` **Power BI semantic model**, then **Add**. Use only that source for this exercise.
 4. In the agent Explorer, select the seven tables, consistent with the semantic model's Prep for AI schema.
 5. Add the **agent-level** text from [AI instructions](agent-instructions.md). Ensure model-specific business rules are also in **Prep data for AI**; agent instructions alone don't control semantic-model DAX generation.
 6. Ask: “What is October 2026 net billed revenue in USD?” Expect **$66,728.00**. Review the evidence/query if the UI exposes it.
-7. Give the agent a clear **description** for MCP clients: “Answers questions about fictional dealership subscriptions, billing, usage, and payments for the Nowcom workshop; data is in USD for January-October 2026.”
+7. Give the agent a clear **description** for MCP clients: “Answers questions about fictional dealership subscriptions, billing, usage, and payments for the Automobile workshop; data is in USD for January-October 2026.”
 8. **Publish** the agent using the UI. Publishing is required for MCP. Share only with approved participants and verify their permissions to the agent and semantic model.
 
 Semantic-model sources don't support agent-level data source descriptions or SQL example queries. The published **agent description** is separate and becomes the advertised MCP tool description. The model's Prep for AI configuration supplies business context for its DAX generator.

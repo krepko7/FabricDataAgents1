@@ -7,7 +7,7 @@ The MCP server is the **Data Agent's own endpoint**, not the Fabric Core MCP ser
 ## Prerequisites
 
 - Complete the [workshop](workshop.md) through semantic model creation and Data Agent configuration.
-- **Publish** `Nowcom Billing Analyst`. The MCP server is available only for a published agent.
+- **Publish** `Automobile Billing Analyst`. The MCP server is available only for a published agent.
 - Meet the Data Agent capacity and tenant settings described in [workshop prerequisites](workshop.md#prerequisites).
 - The caller must be authorized to use the published agent and the data/semantic model. Access to the agent doesn't automatically grant access to data.
 - Use an MCP client that supports **streamable HTTP** and can authenticate to Fabric and attach a valid Fabric bearer token to every request.
@@ -31,10 +31,10 @@ Copy the actual value from Fabric rather than guessing IDs. Publishing the agent
 ## 2. Connect from Visual Studio Code
 
 1. Open a local folder in VS Code. In that folder create a `.vscode` folder and an `mcp.json` file, or use the file downloaded from Fabric's MCP settings.
-2. In `mcp.json`, select VS Code's **Add Server**, choose **HTTP**, and paste the copied agent MCP URL. Give it a recognizable name such as `Nowcom Billing Agent`.
+2. In `mcp.json`, select VS Code's **Add Server**, choose **HTTP**, and paste the copied agent MCP URL. Give it a recognizable name such as `Automobile Billing Agent`.
 3. When prompted, use the client's Fabric sign-in flow and sign in as an authorized work/school user. Approve only the connection and permissions appropriate for your organization.
 4. Start the server and confirm that VS Code shows it as connected and discovers the agent's one tool. If the client asks which tools to enable, enable the displayed Data Agent tool.
-5. In GitHub Copilot Chat choose **Agent** mode and an available model. Ask: “Use the Nowcom Billing Agent to tell me October 2026 net billed revenue in USD.”
+5. In GitHub Copilot Chat choose **Agent** mode and an available model. Ask: “Use the Automobile Billing Agent to tell me October 2026 net billed revenue in USD.”
 6. Approve the tool call if prompted. Inspect the tool call and answer. The baseline result should be **$66,728.00**. Compare it with the report visual and the Data Agent's own chat.
 
 VS Code's exact commands and prompts can vary by version. See Microsoft's [Data Agent MCP documentation](https://learn.microsoft.com/en-us/fabric/data-science/data-agent-mcp-server) for the current client-specific flow.
