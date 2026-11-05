@@ -8,7 +8,7 @@ Choose a file-upload or Azure SQL mirroring workshop using **fictional** Dealers
 
 | Resource | Time | Data and scope |
 |---|---|---|
-| [**Workshop Express with file upload**](workshop-express/README.md) | 60-75 minutes | **One CSV and one table**; Lakehouse upload, semantic model, Prep for AI, Data Agent instructions, and 12 copy-ready questions |
+| [**Workshop Express with file upload**](workshop-express/README.md) | 60-75 minutes | **Two CSVs and one relationship**; billing plus product lookup, Lakehouse upload, semantic model, Prep for AI, Data Agent instructions, and 12 copy-ready questions |
 | [Workshop with file upload](docs/workshop.md) | 3 hours | Seven operational-style CSVs, model relationships, Data Agent, 12 questions, and MCP clients |
 | [Workshop with mirroring](docs/workshop-mirroring.md) | 3 hours | Mirror seven tables from Azure SQL Database `dealership` on `kirbysqlserver2.database.windows.net`, then model, configure the agent, try 12 questions, and use MCP |
 

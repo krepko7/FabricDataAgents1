@@ -7,7 +7,7 @@ Use the two blocks in their respective configuration screens. **Model Prep for A
 In the `Dealership Billing SM` semantic model, open **Prep data for AI > AI instructions**, review and paste:
 
 ```text
-Use dealershipbilling for fictional dealership subscription and billing
+Use dealershipbilling and products for fictional dealership subscription and billing
 analysis. Data covers January-October 2026 in USD. The reporting date is
 November 3, 2026, not today's date. Product labels and prices are illustrative,
 not verified Dealership offerings or customer information.
@@ -16,6 +16,13 @@ Grain is one subscription per service month, uniquely identified by MonthStart
 and SubscriptionID. The same contract repeats across months. MonthStart is
 the analysis date; October means MonthStart = 2026-10-01. Use exact month
 filters, not StartDate, EndDate, or the reporting date, for monthly results.
+
+products has one row per ProductID and owns ProductName. dealershipbilling
+has ProductID, not ProductName. Use the active one-to-many relationship from
+products[ProductID] to dealershipbilling[ProductID], with single-direction
+filtering from products to billing. Group and filter products using
+products[ProductName], and aggregate metrics from dealershipbilling.
+Never infer the product from SubscriptionID or use a Cartesian join.
 
 Net billed or billed revenue means SUM(NetBilled). NetBilled equals
 RecurringBilled + UsageBilled + Credits. Credits are signed negative amounts.
@@ -65,7 +72,7 @@ unsupported metrics, causes, or actions. Treat anomalies as review candidates,
 not proven fraud. Query the data rather than memorizing expected answers.
 ```
 
-In the **AI data schema / Simplify data schema**, include `dealershipbilling` and the columns used by these questions. Suggested synonyms: `DealershipName` = dealer/customer; `NetBilled` = billed revenue/net billing; `ContractMRR` = monthly recurring revenue/run rate; `UnbilledOverage` = unbilled usage gap. Preserve the actual column names to match this resource.
+In the **AI data schema / Simplify data schema**, include **both `dealershipbilling` and `products`**, both `ProductID` columns, `products[ProductName]`, and the billing columns used by these questions. Suggested synonyms: `products[ProductName]` = product/service; `DealershipName` = dealer/customer; `NetBilled` = billed revenue/net billing; `ContractMRR` = monthly recurring revenue/run rate; `UnbilledOverage` = unbilled usage gap. Preserve the actual column names to match this resource.
 
 ## Data Agent instructions
 
@@ -74,7 +81,9 @@ In `Dealership Analyst`, paste into the agent instructions:
 ```text
 Help participants investigate fictional dealership subscriptions and billing.
 Use only the Dealership Billing SM Power BI semantic model. Query its
-dealershipbilling table; don't answer from assumptions or external sources.
+dealershipbilling and products tables through their ProductID relationship;
+don't answer from assumptions or external sources. Product names come from
+products; billing metrics come from dealershipbilling.
 
 State the requested month or period, metric definition, USD amounts or units,
 and a concise supporting table. Use the model's Prep for AI business rules.

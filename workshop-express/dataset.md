@@ -1,12 +1,18 @@
 # Workshop Express with file upload data dictionary
 
-Use only [DealershipBilling.csv](data/DealershipBilling.csv). It is a comma-delimited UTF-8 file with headers, **1,262 rows and 32 columns**, derived from the unchanged synthetic CSVs in Workshop with file upload. No participant scripts are required.
+Use [DealershipBilling.csv](data/DealershipBilling.csv) (**1,262 rows and 32 columns**) and [Products.csv](data/Products.csv) (**7 rows and 2 columns**). Both are comma-delimited UTF-8 files with headers, derived from the unchanged synthetic CSVs in Workshop with file upload. No participant scripts are required.
 
-**Grain:** one subscription/month, uniquely identified by `MonthStart` plus `SubscriptionID`. Rows begin in the subscription's start month and continue through October 2026, including ended contracts with zero month-end entitlement. Dealer and product labels are denormalized. Dates use `yyyy-MM-dd`; decimals use a period.
+**Billing grain:** one subscription/month, uniquely identified by `MonthStart` plus `SubscriptionID`. Rows begin in the subscription's start month and continue through October 2026, including ended contracts with zero month-end entitlement. Dealer labels are denormalized; `ProductName` has been replaced by `ProductID`. Dates use `yyyy-MM-dd`; decimals use a period.
+
+**Lookup grain:** one product per `products[ProductID]`. IDs 1-7 match the original product catalog. `Products.csv` contains only `ProductID` (whole number, unique and nonblank) and `ProductName` (text). It does not contain prices or metrics; all other columns remain in billing.
+
+**Semantic relationship:** active `products[ProductID] (1) -> dealershipbilling[ProductID] (*)`, single-direction filtering from products to billing. Both ID columns must have the same whole-number type. Every billing ProductID matches exactly one lookup row. Use `products[ProductName]` for product grouping and slicers, with metrics from `dealershipbilling`. Joining the lookup must neither drop nor multiply billing rows.
 
 Issued invoice lines are aggregated to this grain **before** joining contract/product labels and monthly usage. There are no invoice header totals or payment amounts to duplicate. Monthly `RecurringBilled`, `UsageBilled`, `Credits`, and `NetBilled` reconcile to the original issued invoice lines for all ten months.
 
 ## Column types and definitions
+
+The following columns are in **`dealershipbilling`**. The two lookup columns are defined above.
 
 | Column | Intended type | Meaning / aggregation |
 |---|---|---|
@@ -14,7 +20,7 @@ Issued invoice lines are aggregated to this grain **before** joining contract/pr
 | `SubscriptionID` | Whole number, don't summarize | Contract identifier; repeated across months |
 | `DealershipName` | Text | Fictional customer; unique dealership labels in this dataset |
 | `Region` | Text | Dealer region |
-| `ProductName` | Text | Illustrative service label |
+| `ProductID` | Whole number, don't summarize | Foreign key to `products[ProductID]`; product name is in the lookup only |
 | `StartDate` | Date | Contract start, inclusive |
 | `EndDate` | Nullable date | Contract end, inclusive; blank means open-ended |
 | `MonthlyListPrice` | Numeric USD, don't summarize | Product list fee, repeated per contract/month |
@@ -59,4 +65,4 @@ Dates, numeric amounts, and flags must load with appropriate types. The Lakehous
 
 The fixed reporting date is **November 3, 2026**, with January-October history in USD. Dealerships, service labels, contracts, and prices are synthetic. No invoice identifiers, payment attempts, outstanding balances, overdue measures, taxes, margins, or approval history are included. Don't try to answer the collections questions from Workshop with file upload using this table.
 
-For production, retain governed transaction detail, explicit measures, appropriate dimensional/date modeling, precise currency types, security, and refresh logic. Express intentionally trades that breadth for one upload and straightforward questions.
+For production, retain governed transaction detail, explicit measures, appropriate dimensional/date modeling, precise currency types, security, and refresh logic. Express intentionally trades that breadth for two small uploads, one relationship, and straightforward questions. All billing values and the 12 expected answers are unchanged by this lookup split.

@@ -2,7 +2,7 @@
 
 Use the **copy icon** on each text block to paste the question into the Data Agent. Expected answers below are for the provided Express CSV, not live customer data. All amounts are USD; the fixed reporting date is November 3, 2026.
 
-These questions are adapted for the **single table**. They don't require invoice/payment data or model relationships. The anomaly flags and monetary differences are precomputed, so this lab demonstrates conversational exploration of prepared metrics, not autonomous anomaly detection.
+These questions use **billing plus the product lookup**. Product names come from `products[ProductName]` through the active **1:\*** ProductID relationship to `dealershipbilling`; all amounts and flags remain in billing. The expected answers are unchanged. No invoice/payment data is required. The anomaly flags and monetary differences are precomputed, so this lab demonstrates conversational exploration of prepared metrics, not autonomous anomaly detection.
 
 ## 1. October billing and product mix
 
@@ -22,7 +22,7 @@ For October 2026, show net billed revenue by product in USD, split into Recurrin
 | AutoCheck Reports (demo) | $1,924.00 |
 | Vehicle Book Values | $680.00 |
 
-**Check:** billed amounts aren't cash collected or recognized accounting revenue.
+**Check:** billed amounts aren't cash collected or recognized accounting revenue. This question also tests the relationship: group using `products[ProductName]`. Repeated grand totals for every product indicate that product filtering isn't reaching billing.
 
 ## 2. Top billed dealerships
 
