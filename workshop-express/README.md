@@ -31,7 +31,7 @@ Capacity provisioning, tenant approvals, and sign-in should be completed beforeh
 
 1. Download the repository: on [GitHub](https://github.com/krepko7/FabricDataAgents1), select the green **Code** button above the file list, then **Download ZIP**. Extract the ZIP and open `workshop-express`, then `data`. You need only `NowcomBillingExpress.csv`, not the original seven CSVs.
 2. Sign in to [Microsoft Fabric](https://app.fabric.microsoft.com/) with an authorized work/school account.
-3. Use a workspace on an active **paid F2+ Fabric capacity**, or **P1+ Premium capacity with Fabric enabled**, for the Data Agent. Confirm applicable tenant AI/cross-geo settings, region, licensing, model edit permissions, and permissions to create Lakehouse, semantic model, and Data Agent items. Trial capacity alone doesn't meet the documented Data Agent capacity requirement.
+3. Use a workspace on an active Fabric capacity of F2 or higher.
 4. If you need a workspace, select **Workspaces > New workspace**, give it a unique name, and choose your approved capacity in the creation settings or **Workspace settings > Workspace type**. If unavailable, ask the administrator for an approved existing workspace. Capacity resources may incur charges.
 
 ## 1. Understand the single table
