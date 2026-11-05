@@ -103,20 +103,63 @@ Check amounts, periods, signs, units, and customer/product sets. Outliers are **
 
 ## 6. Run ad-hoc SQL
 
-1. Click your workspace on the left menu, then click the link for the DealershipLH of type "SQL Analytics Endpoint".
-2. Pick "New SQL Query" from the menu and run the query (or similar) select top 10 \* from dealershipbilling.
-3. Pick "New SQL Query" from the menu again and pick "New Visual Query".
-4. Expand the tables on the left in the Explorer menu and drag the table dealershipbilling to the query canvas.
-5. Click the blue + sign to the right of the table icon in the query canvas and pick "keep rows" and enter a number like 10.
-6. You will see the results of your visual query below.
+1. Open your workspace from the left menu, then open **DealershipLH** of type **SQL analytics endpoint**. These queries read the Lakehouse tables directly, not the semantic model. The joins below are separate from the relationship you created in step 3.
+2. Select **New SQL query**, paste the following T-SQL, and select **Run**. It joins billing to the product lookup and shows October billed amounts by product. If your tables use a schema other than `dbo`, replace `dbo` with the schema shown in Explorer.
+
+   ```sql
+   SELECT
+       p.ProductName,
+       SUM(b.RecurringBilled) AS RecurringBilled,
+       SUM(b.UsageBilled) AS UsageBilled,
+       SUM(b.Credits) AS Credits,
+       SUM(b.NetBilled) AS NetBilled
+   FROM dbo.dealershipbilling AS b
+   INNER JOIN dbo.products AS p
+       ON b.ProductID = p.ProductID
+   WHERE b.MonthStart = '2026-10-01'
+   GROUP BY p.ProductName
+   ORDER BY NetBilled DESC;
+   ```
+
+3. Select **New visual query** from the ribbon (or the **New query** menu). Drag **both `dealershipbilling` and `products`** from **Explorer** onto the canvas to build the same join without writing SQL.
+4. Open the context menu on the `dealershipbilling` node and select **Merge queries as new**. In the merge dialog, select `dealershipbilling` as the first table and `products` as the second. Select **`ProductID` in each table**, choose **Inner** as the join kind, and confirm.
+5. Select the new **Merge** node to preview results. Expand the merged `products` column using its expand icon, selecting **`ProductName`** only. Use the `MonthStart` column's filter to keep **October 1, 2026**.
+6. On the merged query, use **Group by** (from the node's **+** or transformation menu). Group on the expanded **`ProductName`** column and add a **Sum** aggregation of `NetBilled`, named `NetBilled`. The expanded label may appear as `products.ProductName`. Preview the seven product totals; sort `NetBilled` descending if desired.
+7. Compare both query results with [question 1](demo-scenarios.md#1-october-billing-and-product-mix): Carfax Reports (demo) is **$33,996.00**, Dealer Website is **$4,776.00**, and the seven NetBilled amounts sum to **$66,728.00**. Optional: select **View query** to inspect the visual query's generated SQL. If it shows only an unmerged table, use the Merge node's context menu to **Enable load** for that query. You don't need to save a view or another table.
 
 ## 7. Auto-Create a report
 
-1. Click back to your workspace menu on the far left menu.
-2. Pick the 'Dealership Billing SM' semantic model.
-3. Now click "New report" in the top right menu.
-4. Add a table visual with **`products[ProductName]`** and **Sum of `dealershipbilling[NetBilled]`**. Filter `dealershipbilling[MonthStart]` to **October 1, 2026**. Each product must show its own amount, not the same grand total; compare the seven rows with [question 1](demo-scenarios.md#1-october-billing-and-product-mix). The overall total is **$66,728.00**, including **$33,996.00** for Carfax Reports (demo).
-5. Add a slicer with **`products[ProductName]`** and select **Dealer Website**. Net billed must become **$4,776.00** for October. Clear the product slicer: **Sum of `ContractMRR`** must show **$29,956.00** and **Sum of `EntitledAtMonthEnd`** must show **124**. Remove the month filter and use **Count of `SubscriptionID`**, not distinct count, to check **1,262 billing rows**.
+1. Return to your workspace, open the **`Dealership Billing SM` semantic model**, and select **New report** to start a blank report connected to that model. Don't use **Visualize results** from the SQL editor: this exercise should use your existing semantic model and its relationship.
+2. In the report editor, select **Edit** if needed, then select **Copilot** in the ribbon to open the Copilot pane.
+3. Choose **Suggest content for a new report page**, if shown, or enter the following prompt. Some versions label the suggested action **Suggest content for this report**.
+
+   ```text
+   Suggest content for a new report page about October 2026 dealership billing.
+   Use the Dealership Billing SM semantic model and its product-to-billing
+   relationship. Focus on net billed revenue by product and dealership,
+   month-end contract MRR, and entitled contract count.
+   ```
+
+4. Review Copilot's suggestions, then ask it to create the billing overview page. Use this copy-ready prompt to specify the fields, period, and aggregations:
+
+   ```text
+   Create a new report page titled October 2026 Billing Overview.
+   Filter the whole page to dealershipbilling[MonthStart] = October 1, 2026.
+   Add cards for SUM(NetBilled), SUM(ContractMRR), and SUM(EntitledAtMonthEnd)
+   from dealershipbilling.
+   Add a chart of SUM(dealershipbilling[NetBilled]) by products[ProductName],
+   a chart of net billed amounts by dealershipbilling[DealershipName],
+   and a slicer using products[ProductName].
+   Use the existing ProductID relationship. Show monetary amounts in USD.
+   NetBilled is billed charges, not cash collected. MRR and entitled count
+   are single-month snapshots; do not sum them across months.
+   ```
+
+5. Inspect the generated page and its filters. Ask Copilot to add or change any missing visuals; adjust formatting manually if necessary. Copilot output can vary and isn't guaranteed to use the correct aggregation or month.
+6. With October selected and no product selection, confirm **$66,728.00 NetBilled**, **$29,956.00 ContractMRR**, and **124 entitled contracts**. Compare the product chart with [question 1](demo-scenarios.md#1-october-billing-and-product-mix). Select **Dealer Website** in the product slicer: NetBilled must become **$4,776.00**. If every product shows the grand total, check the active ProductID relationship and the product field used in the visual. Clear the slicer after checking.
+7. Select **Save**, name the report **`Dealership Billing Overview`**, and save it in your approved workshop workspace.
+
+**If Copilot isn't available:** ask the facilitator to confirm the eligible paid capacity, Copilot tenant settings, regional availability, and your report/model permissions. Copilot report creation also requires the model's **Q&A feature switch** enabled and **implicit measures** not disabled. Don't change tenant settings yourself. For an optional full-row check, use an unfiltered report visual with **Count of `dealershipbilling[SubscriptionID]`**, not distinct count: expect **1,262**.
 
 ## References
 
@@ -125,5 +168,7 @@ Check amounts, periods, signs, units, and customer/product sets. Outliers are **
 - [Prep data for AI](https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai)
 - [Create a Fabric Data Agent](https://learn.microsoft.com/en-us/fabric/data-science/how-to-create-data-agent)
 - [Configure Data Agent data sources](https://learn.microsoft.com/en-us/fabric/data-science/data-agent-add-datasources)
+- [Query using the visual query editor](https://learn.microsoft.com/en-us/fabric/data-warehouse/visual-query-editor)
+- [Create and edit Power BI reports with Copilot](https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-create-reports)
 
 UI labels, prerequisites, and capabilities can change; confirm availability before the session.
