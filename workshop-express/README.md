@@ -28,12 +28,13 @@ Capacity provisioning, tenant approvals, and sign-in should be completed beforeh
 | [Copy-ready AI instructions](ai-instructions.md)                      | Separate semantic model and Data Agent instructions                                                        |
 | [12 copy-ready questions and answer key](demo-scenarios.md)           | Test the agent and check results                                                                           |
 
-## Before the session
+## Set up
 
-1. Download the repository: on [GitHub](https://github.com/krepko7/FabricDataAgents1), select the green **Code** button above the file list, then **Download ZIP**. Extract the ZIP and open `workshop-express`, then `data`. Use **both** `DealershipBilling.csv` and `Products.csv` from this folder, not the original seven CSVs in the repository's top-level `data` folder.
-2. Sign in to [Microsoft Fabric](https://app.fabric.microsoft.com/) with an authorized work/school account.
-3. Use a workspace on an active **Fabric capacity of F2 or higher (example: F4)**.
-4. If you need a workspace, select **Workspaces > New workspace**, give it a unique name, and choose your approved capacity in the creation settings or **Workspace settings > Workspace type**. If unavailable, ask the administrator for an approved existing workspace. Capacity resources may incur charges.
+1. Download just the two data files: click each **.csv link** in the Resources table above (`DealershipBilling.csv` and `Products.csv`). On each GitHub file page, click **Download raw file** (the download-arrow icon near the top right of the file preview). Save both CSVs to your computer; you don't need to download or extract the entire repository.
+2. **Optional alternative:** download the entire repository instead. On [GitHub](https://github.com/krepko7/FabricDataAgents1), select the green **Code** button above the file list, then **Download ZIP**. Extract the ZIP and open `workshop-express`, then `data`. Use **both** `DealershipBilling.csv` and `Products.csv` from this folder, not the original seven CSVs in the repository's top-level `data` folder. Skip this step if you downloaded the files in step 1.
+3. Sign in to [Microsoft Fabric](https://app.fabric.microsoft.com/) with an authorized work/school account.
+4. Use a workspace on an active **Fabric capacity of F2 or higher (example: F4)**.
+5. If you need a workspace, select **Workspaces > New workspace**, give it a unique name, and choose your approved capacity in the creation settings or **Workspace settings > Workspace type**. If unavailable, ask the administrator for an approved existing workspace. Capacity resources may incur charges.
 
 ## 1. Understand the two tables
 
@@ -46,7 +47,7 @@ Use USD and a fixed reporting date of **November 3, 2026**. Filter to a single m
 ## 2. Create a Lakehouse and load both CSVs
 
 1. In your approved workspace, select **New item**, search for **Lakehouse**, and create `DealershipLH` (add a unique suffix if necessary).
-2. In the Lakehouse explorer, select **...** next to **Files > Upload > Upload files**. Upload `DealershipBilling.csv` and `Products.csv` from the extracted `workshop-express\data` folder.
+2. In the Lakehouse explorer, select **...** next to **Files > Upload > Upload files**. Upload the `DealershipBilling.csv` and `Products.csv` files you downloaded during **Set up** (or find them in the extracted `workshop-express\data` folder if you chose the ZIP).
 3. Select **...** next to `DealershipBilling.csv` > **Load to tables > New table**.
 4. Keep the default schema if shown. Name the table **`dealershipbilling`** using lowercase letters.
 5. Check **Column header**, set **Separator** to a comma, and select **Load**.
