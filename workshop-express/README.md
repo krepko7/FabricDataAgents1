@@ -22,6 +22,7 @@ Capacity provisioning, tenant approvals, and sign-in should be completed beforeh
 | Resource                                                              | Purpose                                                                                                    |
 | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | [Workshop Express with file upload PowerPoint](Workshop-Express.pptx) | 20-slide facilitator deck with editable architecture graphic, lab steps, and question/answer speaker notes |
+| [OneLake security PowerPoint](OneLake-Security.pptx)                   | One-slide conceptual view of a fictional customer and security defined once across supported Fabric experiences |
 | [DealershipBilling.csv](data/DealershipBilling.csv)                   | Billing data: 1,262 rows and 32 columns, including `ProductID` instead of `ProductName`                     |
 | [Products.csv](data/Products.csv)                                     | Product lookup: 7 rows, with `ProductID` and `ProductName`                                                 |
 | [Data dictionary](dataset.md)                                         | Grain, types, precomputed metrics, and limitations                                                         |
